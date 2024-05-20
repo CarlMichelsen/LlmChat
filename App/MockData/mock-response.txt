@@ -1,0 +1,47 @@
+event: 1000
+data: {"type":1000,"message":{"providerPromptIdentifier":"chatcmpl-9QGk9Fl5M2MzBSLXETbgYfVbqUQfF","modelId":"6be7353f-2447-4f6a-93d3-160bca5783ee","modelIdentifierName":"gpt-4o","message":{"isUserMessage":false,"content":[]},"usage":{"inputTokens":0,"outputTokens":0},"stopReason":null,"detailedModelIdentifierName":"gpt-4o-2024-05-13"},"typeName":"MessageStart"}
+
+event: 2000
+data: {"type":2000,"index":0,"typeName":"ContentStart"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":"This"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" is"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" a"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" test"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" response"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" and"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" will"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" always"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" be"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":" repeated"},"typeName":"ContentDelta"}
+
+event: 3000
+data: {"type":3000,"index":0,"delta":{"type":1000,"text":"."},"typeName":"ContentDelta"}
+
+event: 4000
+data: {"type":4000,"index":0,"typeName":"ContentStop"}
+
+event: 5000
+data: {"type":5000,"stopReason":"halt","typeName":"MessageStop"}
+
+event: 6000
+data: {"type":6000,"providerPromptIdentifier":"chatcmpl-9QGk9Fl5M2MzBSLXETbgYfVbqUQfF","inputTokens":48,"outputTokens":11,"stopReason":"halt","typeName":"TotalUsage"}

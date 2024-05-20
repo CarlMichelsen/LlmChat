@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)'=='Debug'">
+    <Exec Command="npm install" />
+    <Exec Command="npm run build" />
+
+    <ItemGroup>
+      <DistFiles Include="$(MSBuildProjectDirectory)/dist/**/*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DistFiles)" DestinationFolder="$(MSBuildProjectDirectory)/../App/wwwroot/%(RecursiveDir)" />
+  </Target>
+
+</Project>
