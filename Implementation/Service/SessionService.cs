@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Security.Claims;
+using System.Text.Json;
 using Domain.Abstraction;
 using Domain.Configuration;
 using Domain.Exception;
@@ -23,6 +24,16 @@ public class SessionService : ISessionService
         this.logger = logger;
         this.httpContextAccessor = httpContextAccessor;
         this.cacheService = cacheService;
+    }
+
+    public Guid UserProfileId
+    {
+        get
+        {
+            var claimsIdentity = this.httpContextAccessor.HttpContext!.User.Identity as ClaimsIdentity;
+            var userProfileId = claimsIdentity?.FindFirst(ClaimConstants.UserProfileId)?.Value;
+            return Guid.Parse(userProfileId!);
+        }
     }
 
     public async Task<Result<SessionData>> GetSessionData()

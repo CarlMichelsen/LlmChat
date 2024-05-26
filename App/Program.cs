@@ -1,4 +1,5 @@
 using App;
+using App.Extensions;
 using Domain.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,11 @@ if (app.Environment.IsDevelopment())
     app.UseCors(ApplicationConstants.DevelopmentCorsPolicyName);
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    // "Why make trillions, when we can make... billions?" - Dr. Evil
+    await app.Services.EnsureDatabaseUpdated();
 }
 
 app.UseAuthentication();

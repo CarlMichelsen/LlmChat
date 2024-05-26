@@ -4,7 +4,9 @@ namespace Domain.Configuration;
 
 public static class ClaimConstants
 {
-    public const string UserProfileId = ClaimTypes.NameIdentifier;
+    public const string SessionIdentityName = "SessionIdentity";
+
+    public const string UserProfileId = "ProfileId";
 
     public const string AuthenticationMethodUserId = "AuthenticationMethodUserId";
 

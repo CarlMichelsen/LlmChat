@@ -11,7 +11,7 @@ import LoggedOut from './components/LoginStates/LoggedOut';
 import Error from './components/LoginStates/Error';
 
 console.log("Prompt sent!");
-sendMessage({ content: ["hello"]}, (steamEvent) => {
+sendMessage({ content: [{ index: 0, contentType: "Text", content: "hello" }], modelIdentifier: "2370891f-9593-4ba6-be41-56e47fa6083f" }, (steamEvent) => {
 	console.log(steamEvent);
 });
 

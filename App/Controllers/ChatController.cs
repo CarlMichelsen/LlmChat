@@ -1,30 +1,22 @@
-﻿using System.Text.Json;
+﻿using Domain.Configuration;
 using Domain.Dto.Chat;
+using Interface.Handler;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers;
 
+[Authorize(ApplicationConstants.SessionAuthenticationScheme)]
 [Route("api/v1/[controller]")]
 [ApiController]
 public class ChatController(
-    ILogger<ChatController> logger) : ControllerBase
+    ILogger<ChatController> logger,
+    IMessageHandler messageHandler) : ControllerBase
 {
     [HttpPost]
-    public async Task SendMessage([FromBody] NewUserMessageDto newUserMessageDto)
+    public async Task SendMessage([FromBody] NewMessageDto newUserMessageDto)
     {
-        logger.LogInformation("SendMessage: {UserMessageJson}", JsonSerializer.Serialize(newUserMessageDto));
-
-        var directory = AppContext.BaseDirectory;
-        var path = Path.Combine(directory, "MockData/mock-response.txt");
-
-        Console.WriteLine("START");
-        await foreach (var line in System.IO.File.ReadLinesAsync(path))
-        {
-            await Task.Delay(TimeSpan.FromMilliseconds(10));
-            await this.HttpContext.Response.WriteAsync(line + '\n');
-            Console.WriteLine(line);
-        }
-        
-        Console.WriteLine("END");
+        logger.LogInformation("SendMessage\n{Message}", newUserMessageDto.Content.First().Content);
+        await messageHandler.SendMessage(newUserMessageDto, this.HttpContext.RequestAborted);
     }
 }

@@ -1,10 +1,13 @@
-﻿using Domain.Dto;
+﻿using Domain.Configuration;
+using Domain.Dto;
 using Domain.Session;
 using Interface.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers;
 
+[Authorize(ApplicationConstants.SessionAuthenticationScheme)]
 [Route("api/v1/[controller]")]
 [ApiController]
 public class SessionController(

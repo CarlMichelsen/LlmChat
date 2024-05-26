@@ -11,9 +11,11 @@ namespace App.Security;
 
 public class SessionAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
+    private readonly IHttpContextAccessor httpContextAccessor;
     private readonly ISessionService sessionService;
 
     public SessionAuthenticationHandler(
+        IHttpContextAccessor httpContextAccessor,
         ISessionService sessionService,
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
@@ -21,6 +23,7 @@ public class SessionAuthenticationHandler : AuthenticationHandler<Authentication
         : base(options, logger, encoder)
     {
         this.sessionService = sessionService;
+        this.httpContextAccessor = httpContextAccessor;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -37,15 +40,17 @@ public class SessionAuthenticationHandler : AuthenticationHandler<Authentication
         var sessionDataResult = await this.sessionService.GetSessionData();
         if (sessionDataResult.IsSuccess)
         {
-            var claimsPrincipal = this.CreateClaimsPrincipal(sessionDataResult.Unwrap());
-            var ticket = new AuthenticationTicket(claimsPrincipal, ApplicationConstants.SessionAuthenticationScheme);
+            var claimsIdentity = this.CreateClaimsIdentity(sessionDataResult.Unwrap());
+            this.httpContextAccessor.HttpContext!.User.AddIdentity(claimsIdentity);
+
+            var ticket = new AuthenticationTicket(new ClaimsPrincipal(claimsIdentity), ApplicationConstants.SessionAuthenticationScheme);
             return AuthenticateResult.Success(ticket);
         }
         
         return AuthenticateResult.NoResult();
     }
 
-    private ClaimsPrincipal CreateClaimsPrincipal(
+    private ClaimsIdentity CreateClaimsIdentity(
         SessionData sessionData)
     {
         var claims = new List<Claim>
@@ -58,7 +63,6 @@ public class SessionAuthenticationHandler : AuthenticationHandler<Authentication
             new Claim(ClaimConstants.AuthenticationMethodName, sessionData.AuthenticationMethodName),
         };
 
-        var identity = new ClaimsIdentity(claims, "session");
-        return new ClaimsPrincipal(identity);
+        return new ClaimsIdentity(claims, ClaimConstants.SessionIdentityName);
     }
 }

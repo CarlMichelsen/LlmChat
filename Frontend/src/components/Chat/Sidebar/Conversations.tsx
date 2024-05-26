@@ -1,3 +1,6 @@
+import ConversationList from "./ConversationList";
+import MobileConversationList from "./MobileConversationList";
+
 const testConversationSummaries = [
     "Doing weird shit",
     "Did the math",
@@ -5,28 +8,17 @@ const testConversationSummaries = [
     "Found non-viable solution"
 ];
 
-const ConversationOption: React.FC<{summary: string}> = ({ summary }) => {
-    return (
-        <li className="grid grid-cols-[225px_25px]">
-            <p>{summary}</p>
-            <button>X</button>
-        </li>
-    );
-}
-
 const Conversations: React.FC = () => {
 
     return (
         <>
-            <div className="md:hidden block" id="top-sidebar">
-                <ol>
-                    {testConversationSummaries.map(s => (<ConversationOption key={s} summary={s} />))}
-                </ol>
+            <div className="md:hidden block">
+                <MobileConversationList conversations={testConversationSummaries} />
             </div>
 
-            <ol className="hidden md:block" id="large-sidebar">
-                {testConversationSummaries.map(s => (<ConversationOption key={s} summary={(s)} />))}
-            </ol>
+            <div className="hidden md:block">
+                <ConversationList conversations={testConversationSummaries} />
+            </div>
         </>
     );
 }
