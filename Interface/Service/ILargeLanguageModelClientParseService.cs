@@ -9,7 +9,6 @@ public interface ILargeLanguageModelClientParseService
 {
     IAsyncEnumerable<ContentDeltaDto> Parse(
         NewMessageData initiatedMessage,
-        LlmModelDto model,
         IAsyncEnumerable<LlmStreamEvent> streamEvents,
         Func<ConcludedMessage, LlmModelDto, Task> handleConcludeMessage);
 }

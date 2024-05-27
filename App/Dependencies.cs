@@ -21,6 +21,7 @@ public static class Dependencies
         builder.Configuration.AddJsonFile("secrets.json", optional: false, reloadOnChange: true);
         builder.Services
             .Configure<LargeLanguageModelOptions>(builder.Configuration.GetSection(LargeLanguageModelOptions.SectionName))
+            .Configure<ConversationOptions>(builder.Configuration.GetSection(ConversationOptions.SectionName))
             .Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
 
         // Handler
@@ -31,13 +32,18 @@ public static class Dependencies
         builder.Services
             .AddScoped<ICacheService, CacheService>()
             .AddScoped<ISessionService, SessionService>()
+            .AddScoped<IModelService, ModelService>()
+            .AddScoped<ISummaryService, SummaryService>()
             .AddScoped<IMessageResponseService, MessageResponseService>()
-            .AddScoped<IPromptMapperService, PromptMapperService>();
+            .AddScoped<IConversationDtoService, ConversationDtoService>()
+            .AddScoped<IConversationOptionService, ConversationOptionService>();
         
         // Repository
         builder.Services
             .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
-            .AddScoped<IMessageInitiationRepository, MessageInitiationRepository>();
+            .AddScoped<IMessageInitiationRepository, MessageInitiationRepository>()
+            .AddScoped<IConversationRepository, ConversationRepository>()
+            .AddScoped<IConversationReadRepository, ConversationReadRepository>();
         
         // Client
         var llmConfig = builder.Configuration

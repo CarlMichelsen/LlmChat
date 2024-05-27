@@ -72,14 +72,20 @@ public class MessageInitiationRepository(
         var newMessage = new MessageEntity
         {
             Content = newUserMessageDto.Content
-                .Select(x => new ContentEntity { ContentType = Enum.Parse<MessageContentType>(x.ContentType), Content = x.Content })
+                .Select(x => new ContentEntity
+                {
+                    ContentType = Enum.Parse<MessageContentType>(x.ContentType),
+                    Content = x.Content,
+                })
                 .ToList(),
             Prompt = prompt,
             PreviousMessage = responseToMessage,
             CompletedUtc = DateTime.UtcNow,
         };
-
+        
         conversationEntity.Messages.Add(newMessage);
+        conversationEntity.LastAppendedUtc = DateTime.UtcNow;
+
         await applicationContext.SaveChangesAsync();
         return new NewMessageData
         {

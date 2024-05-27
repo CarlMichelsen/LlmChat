@@ -3,6 +3,7 @@ using Domain.Conversation;
 using Domain.Dto.Chat;
 using Domain.Dto.Chat.Stream;
 using Domain.Exception;
+using Implementation.Map;
 using Interface.Repository;
 using Interface.Service;
 using LargeLanguageModelClient;
@@ -15,9 +16,9 @@ namespace Implementation.Service;
 public class MessageResponseService(
     ILogger<MessageResponseService> logger,
     ILargeLanguageModelClient largeLanguageModelClient,
-    IPromptMapperService promptMapperService,
-    IGetOrCreateConversationRepository getOrCreateConversationRepository,
-    IMessageInitiationRepository messageInitiationRepository,
+    IConversationRepository conversationRepository,
+    IModelService modelService,
+    ISummaryService summaryService,
     ISessionService sessionService,
     IHttpContextAccessor httpContextAccessor) : IMessageResponseService
 {
@@ -25,8 +26,7 @@ public class MessageResponseService(
         NewMessageDto newUserMessageDto,
         CancellationToken cancellationToken)
     {
-        var promptResult = await promptMapperService
-            .ToPrompt(newUserMessageDto);
+        var promptResult = PromptMapper.ToPrompt(newUserMessageDto);
 
         if (promptResult.IsError)
         {
@@ -34,15 +34,14 @@ public class MessageResponseService(
             return;
         }
 
-        var modelResponse = await largeLanguageModelClient.GetModel(
-            promptResult.Unwrap().ModelIdentifier);
-        if (!modelResponse.Ok)
+        var model = await modelService.GetModel(promptResult.Unwrap().ModelIdentifier);
+        if (model is null)
         {
-            await this.RespondWithError(default, string.Join(", ", modelResponse.Errors));
+            await this.RespondWithError(default, "Failed to find model");
             return;
         }
 
-        var conversationResult = await getOrCreateConversationRepository.GetOrCreateConversation(
+        var conversationResult = await conversationRepository.GetOrCreateConversation(
             sessionService.UserProfileId,
             newUserMessageDto.ConversationId);
 
@@ -56,9 +55,9 @@ public class MessageResponseService(
         newUserMessageDto = newUserMessageDto with { ConversationId = conversation.Id };
         await this.RespondWithNewConversationId(conversation.Id);
 
-        var initiatedMessageResult = await messageInitiationRepository.InitiateMessage(
+        var initiatedMessageResult = await conversationRepository.InitiateMessage(
             newUserMessageDto,
-            modelResponse.Data!,
+            model,
             conversation,
             default);
         if (initiatedMessageResult.IsError)
@@ -67,10 +66,9 @@ public class MessageResponseService(
             return;
         }
 
-        var parser = new LargeLanguageModelClientParseService(modelResponse.Data!) as ILargeLanguageModelClientParseService;
+        var parser = new LargeLanguageModelClientParseService(model) as ILargeLanguageModelClientParseService;
         var parsedStream = parser.Parse(
             initiatedMessageResult.Unwrap(),
-            modelResponse.Data!,
             largeLanguageModelClient.PromptStream(promptResult.Unwrap(), cancellationToken),
             this.ConcludeMessage);
 
@@ -82,14 +80,14 @@ public class MessageResponseService(
         }
     }
 
-    private static string MapError(Exception e, string fallback)
+    private static string MapError(Exception e, string initial)
     {
         if (e is SafeUserFeedbackException safe)
         {
-            return safe.Message;
+            return $"{initial} -> {safe.Message}";
         }
 
-        return fallback;
+        return initial;
     }
 
     private async Task ConcludeMessage(ConcludedMessage conclusion, LlmModelDto model)
@@ -100,7 +98,7 @@ public class MessageResponseService(
             Content: conclusion.Content,
             ModelIdentifier: model.Id);
 
-        var assistantResponseResult = await messageInitiationRepository.InitiateMessage(
+        var assistantResponseResult = await conversationRepository.InitiateMessage(
             message,
             model,
             conclusion.NewMessageData.Conversation,
@@ -110,16 +108,27 @@ public class MessageResponseService(
         {
             logger.LogCritical(assistantResponseResult.Error!, "Failed to respond to user message");
         }
+
+        var completedConversation = assistantResponseResult.Unwrap().Conversation;
+        var summaryResult = await summaryService.GenerateAndApplySummary(completedConversation);
+        if (summaryResult.Error is not null)
+        {
+            await this.RespondWithError(default, MapError(summaryResult.Error!, "Failed to generate conversation summary"));
+            return;
+        }
+
+        await this.RespondWithNewConversationId(completedConversation.Id, summaryResult.Unwrap());
     }
 
     private async Task RespondWithError(long? conversationId, string error)
     {
         var context = httpContextAccessor.HttpContext!;
         var obj = new ContentDeltaDto(
-            conversationId?.ToString(),
-            default,
-            default,
-            error);
+            ConversationId: conversationId?.ToString(),
+            Content: default,
+            Concluded: default,
+            Summary: default,
+            Error: error);
         
         await context.Response.WriteAsync("\n", CancellationToken.None);
         await context.Response.WriteAsync(
@@ -127,15 +136,17 @@ public class MessageResponseService(
             CancellationToken.None);
     }
 
-    private async Task RespondWithNewConversationId(long conversationId)
+    private async Task RespondWithNewConversationId(long conversationId, string? summary = default)
     {
         var context = httpContextAccessor.HttpContext!;
+        await context.Response.WriteAsync("\n", CancellationToken.None);
         await context.Response.WriteAsync(
             JsonSerializer.Serialize(new ContentDeltaDto(
-                conversationId.ToString(),
-                default,
-                default,
-                default)),
+                ConversationId: conversationId.ToString(),
+                Content: default,
+                Concluded: default,
+                Summary: summary,
+                Error: default)),
             CancellationToken.None);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using Domain.Conversation;
+﻿using Domain.Conversation;
 using Domain.Dto.Chat;
 using Domain.Dto.Chat.Stream;
 using Domain.Entity;
@@ -109,11 +108,11 @@ public class MessageInitiationRepositoryTests : TestDatabase
             CreatorIdentifier = this.creatorIdentifier,
             Messages =
             [m1, m2],
+            LastAppendedUtc = DateTime.UtcNow,
             CreatedUtc = DateTime.UtcNow,
         };
 
         this.Context.Conversations.Add(conv);
-
         this.Context.SaveChanges();
     }
 }

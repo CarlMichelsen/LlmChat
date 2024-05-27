@@ -62,6 +62,12 @@ namespace App.Migrations
                     b.Property<Guid>("CreatorIdentifier")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("LastAppendedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Conversations", "LlmChat");

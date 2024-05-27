@@ -19,7 +19,6 @@ public class LargeLanguageModelClientParseService(
 
     public async IAsyncEnumerable<ContentDeltaDto> Parse(
         NewMessageData initiatedMessage,
-        LlmModelDto model,
         IAsyncEnumerable<LlmStreamEvent> streamEvents,
         Func<ConcludedMessage, LlmModelDto, Task> handleConcludeMessage)
     {
@@ -29,6 +28,7 @@ public class LargeLanguageModelClientParseService(
                 ConversationId: initiatedMessage.Conversation.Id.ToString(),
                 Content: default,
                 Concluded: default,
+                Summary: default,
                 Error: "Parsing engine is already running");
             
             yield break;
@@ -139,6 +139,7 @@ public class LargeLanguageModelClientParseService(
             ConversationId: initiatedMessage.Conversation.Id.ToString(),
             Content: content,
             Concluded: default,
+            Summary: default,
             Error: default);
 
         this.lastKnownPromptIdentifier = messageStart.Message.ProviderPromptIdentifier;
@@ -163,6 +164,7 @@ public class LargeLanguageModelClientParseService(
             ConversationId: initiatedMessage.Conversation.Id.ToString(),
             Content: content,
             Concluded: default,
+            Summary: default,
             Error: default);
         
         return contentDeltaDto;
@@ -180,6 +182,7 @@ public class LargeLanguageModelClientParseService(
             ConversationId: initiatedMessage.Conversation.Id.ToString(),
             Content: default,
             Concluded: concluded,
+            Summary: default,
             Error: default);
         
         this.lastKnownTotalUsage = totalUsage;
@@ -195,6 +198,7 @@ public class LargeLanguageModelClientParseService(
             ConversationId: initiatedMessage.Conversation.Id.ToString(),
             Content: default,
             Concluded: default,
+            Summary: default,
             Error: error.Message);
         
         return contentDeltaDto;

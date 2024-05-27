@@ -18,6 +18,7 @@ public class GetOrCreateConversationRepository(
             {
                 CreatorIdentifier = creatorIdentifier,
                 Messages = [],
+                LastAppendedUtc = DateTime.UtcNow,
                 CreatedUtc = DateTime.UtcNow,
             };
 

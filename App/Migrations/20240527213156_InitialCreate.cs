@@ -22,7 +22,9 @@ namespace App.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Summary = table.Column<string>(type: "text", nullable: true),
                     CreatorIdentifier = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastAppendedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 },
                 constraints: table =>
