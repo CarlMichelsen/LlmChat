@@ -1,7 +1,7 @@
 const Pending: React.FC = () => {
     return (
-        <div>
-            <p>Pending...</p>
+        <div className="mt-96">
+            <p className="text-center text-4xl font-extrabold">Loading...</p>
         </div>
     );
 }

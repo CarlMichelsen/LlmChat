@@ -43,7 +43,7 @@ public class ConversationReadRepository(
         {
             var conversations = await applicationContext.Conversations
                 .Where(c => c.CreatorIdentifier == creatorIdentifier)
-                .OrderBy(c => c.LastAppendedUtc)
+                .OrderByDescending(c => c.LastAppendedUtc)
                 .Take(amount)
                 .ToListAsync();
 

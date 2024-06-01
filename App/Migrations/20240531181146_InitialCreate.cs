@@ -39,12 +39,15 @@ namespace App.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ModelName = table.Column<string>(type: "text", nullable: false),
+                    ModelId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProviderPromptIdentifier = table.Column<string>(type: "text", nullable: false),
                     Model = table.Column<string>(type: "text", nullable: false),
                     InputTokens = table.Column<long>(type: "bigint", nullable: false),
                     OutputTokens = table.Column<long>(type: "bigint", nullable: false),
                     CurrentMillionInputTokenPrice = table.Column<long>(type: "bigint", nullable: false),
                     CurrentMillionOutputTokenPrice = table.Column<long>(type: "bigint", nullable: false),
+                    StopReason = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {

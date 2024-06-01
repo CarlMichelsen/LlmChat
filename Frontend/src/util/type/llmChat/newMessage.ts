@@ -1,8 +1,8 @@
-import { Content } from "./content";
+import { Content } from "./conversation/content";
 
 export type NewMessage = {
-    conversationId?: number;
-    responseToMessageId?: number;
+    conversationId?: string;
+    responseToMessageId?: string;
     content: Content[];
     modelIdentifier: string;
 }

@@ -2,7 +2,7 @@
 
 namespace Domain.Dto.Chat.Stream;
 
-public class ContentDto
+public class StreamContentDto
 {
     [JsonPropertyName("index")]
     public required int Index { get; init; }

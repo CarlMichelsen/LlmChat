@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers;
 
-[Authorize(ApplicationConstants.SessionAuthenticationScheme)]
 [Route("api/v1/[controller]")]
 [ApiController]
 public class SessionController(
@@ -28,6 +27,7 @@ public class SessionController(
     }
 
     [HttpDelete]
+    [Authorize(ApplicationConstants.SessionAuthenticationScheme)]
     public async Task<ActionResult<ServiceResponse<bool>>> RemoveSessionData()
     {
         var sessionData = await sessionService.RemoveSessionData();

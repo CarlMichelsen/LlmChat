@@ -125,10 +125,21 @@ namespace App.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("ModelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<long>("OutputTokens")
                         .HasColumnType("bigint");
 
                     b.Property<string>("ProviderPromptIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StopReason")
                         .IsRequired()
                         .HasColumnType("text");
 

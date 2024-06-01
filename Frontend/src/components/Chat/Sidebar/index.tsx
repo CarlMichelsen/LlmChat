@@ -3,10 +3,36 @@ import store, { RootApplicationState } from "../../../store";
 import { logoutRequest } from "../../../util/client/loginClient";
 import { logout } from "../../../store/userSlice";
 import Conversations from "./Conversations";
+import { ConversationOption } from "../../../util/client/conversationOption";
+import { getConversationOptions } from "../../../util/client/conversation";
+import { useQuery } from "react-query";
+import { useEffect } from "react";
+import { setConversationOptions } from "../../../store/conversationListSlice";
 
 const Sidebar: React.FC = () => {
     const userState = useSelector((state: RootApplicationState) => state.user);
     const conversationListState = useSelector((state: RootApplicationState) => state.conversationList);
+
+    const fetchConversationOptions = async (): Promise<ConversationOption[]> => {
+        const res = await getConversationOptions();
+        if (res.ok) {
+            return res.data;
+        } else {
+            throw new Error("Failed to fetch conversation options");
+        }
+    }
+
+    const { data, status } = useQuery<ConversationOption[], Error>(
+        'conversationList',
+        fetchConversationOptions, {
+        staleTime: Infinity
+    });
+
+    useEffect(() => {
+        if (status === "success") {
+            store.dispatch(setConversationOptions(data));
+        }
+    }, [data, status]);
 
     const handleLogout = async () => {
         const res = await logoutRequest();
@@ -16,7 +42,7 @@ const Sidebar: React.FC = () => {
     }
 
     return (
-        <div className={`grid grid-rows-[1fr_50px] md:grid-rows-1 md:grid-cols-1 grid-cols-[250px_1fr] h-full ${conversationListState.desktopIsOpen && "overflow-x-hidden"}`}>
+        <div className={`grid grid-rows-[1fr_50px] md:grid-rows-1 md:grid-cols-1 grid-cols-[250px_1fr] h-screen ${conversationListState.desktopIsOpen && "overflow-x-hidden"}`}>
             <div className="order-2 md:order-1">
                 <Conversations />
             </div>

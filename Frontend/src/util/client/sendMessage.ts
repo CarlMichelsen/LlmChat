@@ -32,9 +32,14 @@ export const sendMessage = async (message: NewMessage, eventHandler?: (streamEve
         while ((eolIndex = partialText.indexOf('\n')) >= 0) {
             const line = partialText.slice(0, eolIndex);
             partialText = partialText.slice(eolIndex + 1);
-            
-            const streamEvent = JSON.parse(line) as ContentDelta;
-            eventHandler && eventHandler(streamEvent);
+            if (line == "") continue;
+
+            try {
+                const streamEvent = JSON.parse(line) as ContentDelta;
+                eventHandler && eventHandler(streamEvent);
+            } catch (error) {
+                
+            }
         }
     
         return reader.read().then(processStream);

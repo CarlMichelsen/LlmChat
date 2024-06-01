@@ -4,6 +4,10 @@ public class PromptEntity
 {
     public long Id { get; set; }
 
+    public required string ModelName { get; init; }
+
+    public required Guid ModelId { get; set; }
+
     public required string ProviderPromptIdentifier { get; set; }
 
     public required string Model { get; init; }
@@ -15,4 +19,6 @@ public class PromptEntity
     public required long CurrentMillionInputTokenPrice { get; init; }
 
     public required long CurrentMillionOutputTokenPrice { get; init; }
+
+    public required string StopReason { get; init; }
 }

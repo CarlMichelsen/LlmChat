@@ -26,15 +26,15 @@ public class MessageResponseService(
         NewMessageDto newUserMessageDto,
         CancellationToken cancellationToken)
     {
-        var promptResult = PromptMapper.ToPrompt(newUserMessageDto);
-
-        if (promptResult.IsError)
+        var parsedConversationId = long.TryParse(newUserMessageDto.ConversationId, out long convId);
+        if (!parsedConversationId && !string.IsNullOrWhiteSpace(newUserMessageDto.ConversationId))
         {
-            await this.RespondWithError(default, MapError(promptResult.Error!, "Failed to map to prompt"));
-            return;
+            await this.RespondWithError(default, "Failed to parse conversationId");
         }
+        
+        long? conversationId = parsedConversationId ? convId : null;
 
-        var model = await modelService.GetModel(promptResult.Unwrap().ModelIdentifier);
+        var model = await modelService.GetModel(newUserMessageDto.ModelIdentifier);
         if (model is null)
         {
             await this.RespondWithError(default, "Failed to find model");
@@ -43,7 +43,7 @@ public class MessageResponseService(
 
         var conversationResult = await conversationRepository.GetOrCreateConversation(
             sessionService.UserProfileId,
-            newUserMessageDto.ConversationId);
+            conversationId);
 
         if (conversationResult.IsError)
         {
@@ -52,8 +52,15 @@ public class MessageResponseService(
         }
 
         var conversation = conversationResult.Unwrap();
-        newUserMessageDto = newUserMessageDto with { ConversationId = conversation.Id };
-        await this.RespondWithNewConversationId(conversation.Id);
+        var promptResult = PromptMapper.ToPrompt(conversation, newUserMessageDto);
+        if (promptResult.IsError)
+        {
+            await this.RespondWithError(default, MapError(promptResult.Error!, "Failed to map to prompt"));
+            return;
+        }
+
+        newUserMessageDto = newUserMessageDto with { ConversationId = conversation.Id.ToString() };
+        await this.RespondWithMetaData(conversation.Id.ToString());
 
         var initiatedMessageResult = await conversationRepository.InitiateMessage(
             newUserMessageDto,
@@ -66,17 +73,20 @@ public class MessageResponseService(
             return;
         }
 
+        var userMessage = initiatedMessageResult.Unwrap();
+        await this.RespondWithMetaData(userMessage.Conversation.Id.ToString(), conversation.Summary, userMessage.Message.Id.ToString());
+
         var parser = new LargeLanguageModelClientParseService(model) as ILargeLanguageModelClientParseService;
         var parsedStream = parser.Parse(
-            initiatedMessageResult.Unwrap(),
+            userMessage,
             largeLanguageModelClient.PromptStream(promptResult.Unwrap(), cancellationToken),
             this.ConcludeMessage);
 
         var context = httpContextAccessor.HttpContext!;
         await foreach (var streamEvent in parsedStream)
         {
-            await context.Response.WriteAsync("\n", CancellationToken.None);
             await context.Response.WriteAsync(JsonSerializer.Serialize(streamEvent), CancellationToken.None);
+            await context.Response.WriteAsync("\n", CancellationToken.None);
         }
     }
 
@@ -93,8 +103,8 @@ public class MessageResponseService(
     private async Task ConcludeMessage(ConcludedMessage conclusion, LlmModelDto model)
     {
         var message = new NewMessageDto(
-            ConversationId: conclusion.NewMessageData.Conversation.Id,
-            ResponseToMessageId: conclusion.NewMessageData.Message.Id,
+            ConversationId: conclusion.NewMessageData.Conversation.Id.ToString(),
+            ResponseToMessageId: conclusion.NewMessageData.Message.Id.ToString(),
             Content: conclusion.Content,
             ModelIdentifier: model.Id);
 
@@ -109,44 +119,78 @@ public class MessageResponseService(
             logger.LogCritical(assistantResponseResult.Error!, "Failed to respond to user message");
         }
 
-        var completedConversation = assistantResponseResult.Unwrap().Conversation;
-        var summaryResult = await summaryService.GenerateAndApplySummary(completedConversation);
-        if (summaryResult.Error is not null)
+        var newMessage = assistantResponseResult.Unwrap();
+        var concluded = new ContentConcludedDto
         {
-            await this.RespondWithError(default, MapError(summaryResult.Error!, "Failed to generate conversation summary"));
-            return;
-        }
+            ModelName = model.ModelIdentifierName,
+            ModelId = model.Id,
+            ProviderPromptIdentifier = conclusion.ProviderPromptIdentifier,
+            InputTokens = (int)conclusion.InputTokens,
+            OutputTokens = (int)conclusion.OutputTokens,
+            StopReason = conclusion.StreamUsage?.StopReason ?? "unknown",
+            MessageId = newMessage.Message.Id.ToString(),
+        };
+        await this.RespondWithConclusion(newMessage.Conversation.Id.ToString(), concluded);
 
-        await this.RespondWithNewConversationId(completedConversation.Id, summaryResult.Unwrap());
+        if (string.IsNullOrWhiteSpace(newMessage.Conversation.Summary))
+        {
+            var summaryResult = await summaryService.GenerateAndApplySummary(newMessage.Conversation);
+            if (summaryResult.Error is not null)
+            {
+                await this.RespondWithError(newMessage.Conversation.Id.ToString(), MapError(summaryResult.Error!, "Failed to generate conversation summary"));
+                return;
+            }
+
+            await this.RespondWithMetaData(newMessage.Conversation.Id.ToString(), summaryResult.Unwrap());
+        }
     }
 
-    private async Task RespondWithError(long? conversationId, string error)
+    private async Task RespondWithError(string? conversationId, string error)
     {
         var context = httpContextAccessor.HttpContext!;
         var obj = new ContentDeltaDto(
-            ConversationId: conversationId?.ToString(),
+            ConversationId: conversationId,
+            UserMessageId: default,
             Content: default,
             Concluded: default,
             Summary: default,
             Error: error);
         
+        await context.Response.WriteAsync(JsonSerializer.Serialize(obj), CancellationToken.None);
         await context.Response.WriteAsync("\n", CancellationToken.None);
-        await context.Response.WriteAsync(
-            JsonSerializer.Serialize(obj),
-            CancellationToken.None);
     }
 
-    private async Task RespondWithNewConversationId(long conversationId, string? summary = default)
+    private async Task RespondWithMetaData(string conversationId, string? summary = default, string? userMessageId = default)
     {
         var context = httpContextAccessor.HttpContext!;
-        await context.Response.WriteAsync("\n", CancellationToken.None);
+        var content = new ContentDeltaDto(
+            ConversationId: conversationId,
+            UserMessageId: userMessageId,
+            Content: default,
+            Concluded: default,
+            Summary: summary,
+            Error: default);
+            
         await context.Response.WriteAsync(
-            JsonSerializer.Serialize(new ContentDeltaDto(
-                ConversationId: conversationId.ToString(),
-                Content: default,
-                Concluded: default,
-                Summary: summary,
-                Error: default)),
+            JsonSerializer.Serialize(content),
             CancellationToken.None);
+        await context.Response.WriteAsync("\n", CancellationToken.None);
+    }
+
+    private async Task RespondWithConclusion(string conversationId, ContentConcludedDto contentConcludedDto)
+    {
+        var context = httpContextAccessor.HttpContext!;
+        var content = new ContentDeltaDto(
+            ConversationId: conversationId,
+            UserMessageId: default,
+            Content: default,
+            Concluded: contentConcludedDto,
+            Summary: default,
+            Error: default);
+            
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(content),
+            CancellationToken.None);
+        await context.Response.WriteAsync("\n", CancellationToken.None);
     }
 }

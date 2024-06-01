@@ -1,9 +1,9 @@
-﻿using Domain.Dto.Chat.Stream;
+﻿using Domain.Dto.Conversation;
 
 namespace Domain.Dto.Chat;
 
 public record NewMessageDto(
-    long? ConversationId,
-    long? ResponseToMessageId,
-    List<ContentDto> Content,
+    string? ConversationId,
+    string? ResponseToMessageId,
+    List<MessageContentDto> Content,
     Guid ModelIdentifier);

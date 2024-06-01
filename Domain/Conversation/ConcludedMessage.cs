@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Chat.Stream;
+﻿using Domain.Dto.Conversation;
 
 namespace Domain.Conversation;
 
@@ -18,7 +18,7 @@ public class ConcludedMessage
 
     public required long CurrentMillionOutputTokenPrice { get; init; }
 
-    public required List<ContentDto> Content { get; init; }
+    public required List<MessageContentDto> Content { get; init; }
 
     public required NewMessageData NewMessageData { get; init; }
 

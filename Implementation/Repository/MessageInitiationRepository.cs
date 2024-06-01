@@ -45,10 +45,10 @@ public class MessageInitiationRepository(
         StreamUsage? llmStreamTotalUsage)
     {
         MessageEntity? responseToMessage = default;
-        if (newUserMessageDto.ResponseToMessageId is not null)
+        if (long.TryParse(newUserMessageDto.ResponseToMessageId, out var responseToMessageId))
         {
             responseToMessage = conversationEntity.Messages
-                .FirstOrDefault(m => m.Id == newUserMessageDto.ResponseToMessageId);
+                .FirstOrDefault(m => m.Id == responseToMessageId);
             if (responseToMessage is null)
             {
                 return new SafeUserFeedbackException("Did not find message to respond to");
@@ -61,11 +61,14 @@ public class MessageInitiationRepository(
             prompt = new PromptEntity
             {
                 ProviderPromptIdentifier = llmStreamTotalUsage.ProviderPromptIdentifier,
+                ModelName = model.ModelIdentifierName,
+                ModelId = model.Id,
                 Model = model.ModelIdentifierName,
                 InputTokens = llmStreamTotalUsage.InputTokens,
                 OutputTokens = llmStreamTotalUsage.OutputTokens,
                 CurrentMillionInputTokenPrice = model.Price.MillionInputTokenPrice,
                 CurrentMillionOutputTokenPrice = model.Price.MillionOutputTokenPrice,
+                StopReason = llmStreamTotalUsage.StopReason,
             };
         }
 

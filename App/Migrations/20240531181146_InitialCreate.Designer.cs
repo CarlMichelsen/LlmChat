@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace App.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20240527213156_InitialCreate")]
+    [Migration("20240531181146_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -128,10 +128,21 @@ namespace App.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("ModelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<long>("OutputTokens")
                         .HasColumnType("bigint");
 
                     b.Property<string>("ProviderPromptIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StopReason")
                         .IsRequired()
                         .HasColumnType("text");
 

@@ -1,4 +1,5 @@
-export type Concluded = {
-    inputTokens: number;
-    outputTokens: number;
-}
+import { Prompt } from "./conversation/prompt";
+
+export type Concluded = Prompt & {
+    messageId: string;
+};

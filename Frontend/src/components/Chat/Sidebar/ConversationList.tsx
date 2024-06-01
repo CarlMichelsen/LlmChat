@@ -1,26 +1,30 @@
 import { useSelector } from "react-redux";
 import store, { RootApplicationState } from "../../../store";
-import { openDesktopConversationList } from "../../../store/conversationListSlice";
-import ConversationOption from "./ConversationOption"
+import { openDesktopConversationList, selectConversation } from "../../../store/conversationListSlice";
+import ConversationOptionComponent from "./ConversationOptionComponent"
+import { ConversationOption } from "../../../util/client/conversationOption";
 
-const ConversationList: React.FC<{ conversations: string[] }> = ({ conversations }) => {
+const ConversationList: React.FC<{ conversations?: ConversationOption[] }> = ({ conversations }) => {
     const conversationListState = useSelector((state: RootApplicationState) => state.conversationList);
 
-    // openDesktopConversationList
+    const handleSelectConversation = (conversationId: string) => {
+        store.dispatch(selectConversation(conversationId));
+    }
+
     return (
-        <div id="desktop-conversation-list">
+        <div id="desktop-conversation-list" className="h-full grid grid-rows-[50px_1fr]">
             <div className={`relative h-[50px] grid ${conversationListState.desktopIsOpen ? "grid-cols-[1fr_50px]" : "grid-cols-1"}`}>
                 <div className={conversationListState.desktopIsOpen ? "block" : "hidden"}>
-                    <p>meme</p>
+                    <button onMouseDown={() => store.dispatch(selectConversation(null))}>Create new conversation (WIP)</button>
                 </div>
                 <button
-                    className={`absolute ${conversationListState.desktopIsOpen ? "right-0" : "-right-[50px]"} h-full w-[50px] text-2xl pb-1 hover:text-green-400 transition-all`}
+                    className={`absolute ${conversationListState.desktopIsOpen ? "right-0" : "-right-[50px]"} h-full w-[50px] text-2xl pb-1 hover:text-green-400 transition-all z-10`}
                     onClick={() => store.dispatch(openDesktopConversationList(!conversationListState.desktopIsOpen))}
                     >{conversationListState.desktopIsOpen ? "←" : "→"}</button>
             </div>
 
-            <ol className={conversationListState.desktopIsOpen ? "block" : "hidden"}>
-                {conversations.map(s => (<ConversationOption key={s} summary={s} />))}
+            <ol className={conversationListState.desktopIsOpen ? "block space-y-2 overflow-y-scroll h-full" : "hidden"}>
+                {conversations?.map(s => (<ConversationOptionComponent key={s.id} option={s} selected={conversationListState.selectedConversationId == s.id} selectConversation={handleSelectConversation} />))}
             </ol>
         </div>
     )

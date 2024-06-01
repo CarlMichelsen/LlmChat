@@ -1,15 +1,10 @@
 import { Concluded } from "./concluded";
-import { Content } from "./content";
+import { StreamContent } from "./conversation/streamContent";
 
-type ErrorContentDelta = {
+export type ContentDelta = {
     conversationId?: string;
-    error: string;
-};
-
-type NonErrorContentDelta = {
-    conversationId: string;
-    content?: Content;
+    userMessageId?: string;
+    content?: StreamContent;
     concluded?: Concluded;
+    error?: string;
 }
-
-export type ContentDelta = NonErrorContentDelta | ErrorContentDelta;

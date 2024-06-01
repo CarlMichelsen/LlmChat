@@ -10,8 +10,22 @@ public static class MessageDtoMapper
         return new MessageDto
         {
             Id = messageEntity.Id.ToString(),
+            Prompt = messageEntity.Prompt is null ? null : Map(messageEntity.Prompt),
             Content = messageEntity.Content.Select(Map).ToList(),
             CompletedUtc = messageEntity.CompletedUtc,
+        };
+    }
+
+    public static PromptDto Map(PromptEntity promptEntity)
+    {
+        return new PromptDto
+        {
+            ModelName = promptEntity.Model,
+            ModelId = promptEntity.ModelId,
+            ProviderPromptIdentifier = promptEntity.ProviderPromptIdentifier,
+            InputTokens = (int)promptEntity.InputTokens,
+            OutputTokens = (int)promptEntity.OutputTokens,
+            StopReason = promptEntity.StopReason,
         };
     }
 

@@ -1,5 +1,9 @@
-﻿using Domain.Conversation;
+﻿using System.Runtime.InteropServices;
+using Domain.Conversation;
 using Domain.Dto.Chat.Stream;
+using Domain.Dto.Conversation;
+using Domain.Entity;
+using Domain.Exception;
 using Interface.Service;
 using LargeLanguageModelClient;
 using LargeLanguageModelClient.Dto.Model;
@@ -11,7 +15,7 @@ namespace Implementation.Service;
 public class LargeLanguageModelClientParseService(
     LlmModelDto model) : ILargeLanguageModelClientParseService
 {
-    private readonly Dictionary<int, ContentDto> responseContent = [];
+    private readonly Dictionary<int, StreamContentDto> responseContent = [];
     private bool ready = true;
     private LlmStreamTotalUsage? lastKnownTotalUsage = default;
     private string? lastKnownPromptIdentifier = default;
@@ -26,6 +30,7 @@ public class LargeLanguageModelClientParseService(
         {
             yield return new ContentDeltaDto(
                 ConversationId: initiatedMessage.Conversation.Id.ToString(),
+                UserMessageId: default,
                 Content: default,
                 Concluded: default,
                 Summary: default,
@@ -57,7 +62,7 @@ public class LargeLanguageModelClientParseService(
                     continue;
                 
                 case LlmStreamTotalUsage totalUsage:
-                    yield return this.TotalUsage(
+                    this.TotalUsage(
                         initiatedMessage,
                         totalUsage);
                     continue;
@@ -77,7 +82,7 @@ public class LargeLanguageModelClientParseService(
         this.ready = true;
     }
 
-    private void AppendContent(ContentDto streamContent)
+    private void AppendContent(StreamContentDto streamContent)
     {
         if (this.responseContent.TryGetValue(streamContent.Index, out var content))
         {
@@ -114,11 +119,15 @@ public class LargeLanguageModelClientParseService(
             OutputTokens = this.lastKnownTotalUsage!.OutputTokens,
             CurrentMillionInputTokenPrice = model.Price.MillionInputTokenPrice,
             CurrentMillionOutputTokenPrice = model.Price.MillionOutputTokenPrice,
-            Content = this.responseContent.Select(kv => kv.Value).OrderBy(x => x.Index).ToList(),
+            Content = this.responseContent
+                .Select(kv => kv.Value)
+                .OrderBy(x => x.Index)
+                .Select(kv => new MessageContentDto { ContentType = kv.ContentType, Content = kv.Content })
+                .ToList(),
             NewMessageData = initiatedMessage,
             StreamUsage = streamUsage,
         };
-        
+
         await handleConcludeMessage(conclude, model);
     }
 
@@ -127,7 +136,7 @@ public class LargeLanguageModelClientParseService(
         LlmStreamMessageStart messageStart)
     {
         var contentString = messageStart.Message.Message.Content.FirstOrDefault()?.GetContent();
-        var content = new ContentDto
+        var content = new StreamContentDto
         {
             Index = 0,
             ContentType = Enum.GetName(LlmContentType.Text)!,
@@ -137,6 +146,7 @@ public class LargeLanguageModelClientParseService(
 
         var contentDeltaDto = new ContentDeltaDto(
             ConversationId: initiatedMessage.Conversation.Id.ToString(),
+            UserMessageId: default,
             Content: content,
             Concluded: default,
             Summary: default,
@@ -152,7 +162,7 @@ public class LargeLanguageModelClientParseService(
         NewMessageData initiatedMessage,
         LlmStreamContentDelta contentDelta)
     {
-        var content = new ContentDto
+        var content = new StreamContentDto
         {
             Index = contentDelta.Index,
             ContentType = Enum.GetName(contentDelta.Delta.Type)!,
@@ -162,6 +172,7 @@ public class LargeLanguageModelClientParseService(
 
         var contentDeltaDto = new ContentDeltaDto(
             ConversationId: initiatedMessage.Conversation.Id.ToString(),
+            UserMessageId: default,
             Content: content,
             Concluded: default,
             Summary: default,
@@ -170,24 +181,11 @@ public class LargeLanguageModelClientParseService(
         return contentDeltaDto;
     }
 
-    private ContentDeltaDto TotalUsage(
+    private void TotalUsage(
         NewMessageData initiatedMessage,
         LlmStreamTotalUsage totalUsage)
     {
-        var concluded = new ContentConcludedDto(
-            InputTokens: totalUsage.InputTokens,
-            OutputTokens: totalUsage.OutputTokens);
-
-        var contentDeltaDto = new ContentDeltaDto(
-            ConversationId: initiatedMessage.Conversation.Id.ToString(),
-            Content: default,
-            Concluded: concluded,
-            Summary: default,
-            Error: default);
-        
         this.lastKnownTotalUsage = totalUsage;
-        
-        return contentDeltaDto;
     }
 
     private ContentDeltaDto Error(
@@ -196,6 +194,7 @@ public class LargeLanguageModelClientParseService(
     {
         var contentDeltaDto = new ContentDeltaDto(
             ConversationId: initiatedMessage.Conversation.Id.ToString(),
+            UserMessageId: default,
             Content: default,
             Concluded: default,
             Summary: default,
