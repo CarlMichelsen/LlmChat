@@ -4,16 +4,10 @@ import { Provider, useSelector } from 'react-redux';
 import store, { RootApplicationState } from './store';
 import { getUser } from './util/client/userClient';
 import { handleUserDataState } from './util/handler/userDataHandler';
-import { sendMessage } from './util/client/sendMessage';
 import Pending from './components/LoginStates/Pending';
 import LoggedIn from './components/LoginStates/LoggedIn';
 import LoggedOut from './components/LoginStates/LoggedOut';
 import Error from './components/LoginStates/Error';
-
-console.log("Prompt sent!");
-sendMessage({ content: ["hello"]}, (steamEvent) => {
-	console.log(steamEvent);
-});
 
 const RootComponent: React.FC = () => {
 	// Queries

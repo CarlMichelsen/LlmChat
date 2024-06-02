@@ -1,32 +1,20 @@
-const testConversationSummaries = [
-    "Doing weird shit",
-    "Did the math",
-    "No. Dolphins can't fly",
-    "Found non-viable solution"
-];
-
-const ConversationOption: React.FC<{summary: string}> = ({ summary }) => {
-    return (
-        <li className="grid grid-cols-[225px_25px]">
-            <p>{summary}</p>
-            <button>X</button>
-        </li>
-    );
-}
+import { useSelector } from "react-redux";
+import ConversationList from "./ConversationList";
+import MobileConversationList from "./MobileConversationList";
+import { RootApplicationState } from "../../../store";
 
 const Conversations: React.FC = () => {
+    const conversationListState = useSelector((state: RootApplicationState) => state.conversationList);
 
     return (
         <>
-            <div className="md:hidden block" id="top-sidebar">
-                <ol>
-                    {testConversationSummaries.map(s => (<ConversationOption key={s} summary={s} />))}
-                </ol>
+            <div className="md:hidden block">
+                <MobileConversationList conversations={conversationListState.conversationOptions} />
             </div>
 
-            <ol className="hidden md:block" id="large-sidebar">
-                {testConversationSummaries.map(s => (<ConversationOption key={s} summary={(s)} />))}
-            </ol>
+            <div className="hidden md:block h-full">
+                <ConversationList conversations={conversationListState.conversationOptions} />
+            </div>
         </>
     );
 }

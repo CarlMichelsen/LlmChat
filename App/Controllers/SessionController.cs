@@ -1,6 +1,8 @@
-﻿using Domain.Dto;
+﻿using Domain.Configuration;
+using Domain.Dto;
 using Domain.Session;
 using Interface.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers;
@@ -25,6 +27,7 @@ public class SessionController(
     }
 
     [HttpDelete]
+    [Authorize(ApplicationConstants.SessionAuthenticationScheme)]
     public async Task<ActionResult<ServiceResponse<bool>>> RemoveSessionData()
     {
         var sessionData = await sessionService.RemoveSessionData();

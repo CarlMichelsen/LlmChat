@@ -11,18 +11,18 @@ const initialState: UserState = {
 };
 
 const userSlice = createSlice({
-  name: 'user',
-  initialState,
-  reducers: {
-    login: (state, action: PayloadAction<OAuthUser>) => {
-        state.authorized = "logged-in"
-        state.user = action.payload
+    name: 'user',
+    initialState,
+    reducers: {
+        login: (state, action: PayloadAction<OAuthUser>) => {
+            state.authorized = "logged-in"
+            state.user = action.payload
+        },
+        logout: (state) => {
+            state.authorized = "logged-out"
+            state.user = undefined
+        },
     },
-    logout: (state) => {
-        state.authorized = "logged-out"
-        state.user = undefined
-    },
-  },
 });
 
 export const { login, logout } = userSlice.actions;

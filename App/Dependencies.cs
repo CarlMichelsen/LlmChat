@@ -1,8 +1,15 @@
 ﻿using App.Security;
 using Domain.Configuration;
+using Implementation.Database;
+using Implementation.Handler;
+using Implementation.Repository;
 using Implementation.Service;
+using Interface.Handler;
+using Interface.Repository;
 using Interface.Service;
+using LargeLanguageModelClient;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 namespace App;
 
@@ -13,23 +20,60 @@ public static class Dependencies
         // Configuration
         builder.Configuration.AddJsonFile("secrets.json", optional: false, reloadOnChange: true);
         builder.Services
+            .Configure<LargeLanguageModelOptions>(builder.Configuration.GetSection(LargeLanguageModelOptions.SectionName))
+            .Configure<ConversationOptions>(builder.Configuration.GetSection(ConversationOptions.SectionName))
             .Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
+
+        // Handler
+        builder.Services
+            .AddScoped<IMessageHandler, MessageHandler>();
 
         // Service
         builder.Services
             .AddScoped<ICacheService, CacheService>()
-            .AddScoped<ISessionService, SessionService>();
+            .AddScoped<ISessionService, SessionService>()
+            .AddScoped<IModelService, ModelService>()
+            .AddScoped<ISummaryService, SummaryService>()
+            .AddScoped<IMessageResponseService, MessageResponseService>()
+            .AddScoped<IConversationDtoService, ConversationDtoService>()
+            .AddScoped<IConversationOptionService, ConversationOptionService>();
+        
+        // Repository
+        builder.Services
+            .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
+            .AddScoped<IMessageInitiationRepository, MessageInitiationRepository>()
+            .AddScoped<IConversationRepository, ConversationRepository>()
+            .AddScoped<IConversationReadRepository, ConversationReadRepository>();
         
         // Client
+        var llmConfig = builder.Configuration
+            .GetSection(LargeLanguageModelOptions.SectionName)
+            .Get<LargeLanguageModelOptions>()!;
         builder.Services
+            .RegisterLargeLanguageModelClientDependencies(new Uri(llmConfig.Url), (Username: llmConfig.Username, Password: llmConfig.Password))
             .AddHttpContextAccessor();
         
+        // Database
+        builder.Services.AddDbContext<ApplicationContext>(options =>
+        {
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection"),
+                (b) => b.MigrationsAssembly("App"));
+            
+            if (builder.Environment.IsDevelopment())
+            {
+                options.EnableSensitiveDataLogging();
+            }
+        });
+        
         // Cache
-        var redisConfiguration = builder.Configuration.GetSection(RedisOptions.SectionName);
+        var redisConfiguration = builder.Configuration
+            .GetSection(RedisOptions.SectionName)
+            .Get<RedisOptions>()!;
         builder.Services.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = redisConfiguration[nameof(RedisOptions.ConnectionString)];
-            options.InstanceName = redisConfiguration[nameof(RedisOptions.InstanceName)];
+            options.Configuration = redisConfiguration.ConnectionString;
+            options.InstanceName = redisConfiguration.InstanceName;
         });
 
         // CORS

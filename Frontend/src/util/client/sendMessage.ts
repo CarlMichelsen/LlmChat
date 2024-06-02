@@ -1,8 +1,8 @@
-import { LlmStreamEvent } from "../type/llm/events/llmStreamEvent";
-import { NewUserMessage } from "../type/llmChat/newUserMessage";
+import { ContentDelta } from "../type/llmChat/contentDelta";
+import { NewMessage } from "../type/llmChat/newMessage";
 import { rootUrl } from "./endpoints";
 
-export const sendMessage = async (message: NewUserMessage, eventHandler?: (streamEvent: LlmStreamEvent) => void): Promise<void> => {
+export const sendMessage = async (message: NewMessage, eventHandler?: (streamEvent: ContentDelta) => void): Promise<void> => {
     const response = await fetch(
         `${rootUrl()}/api/v1/chat`,
     {
@@ -32,17 +32,13 @@ export const sendMessage = async (message: NewUserMessage, eventHandler?: (strea
         while ((eolIndex = partialText.indexOf('\n')) >= 0) {
             const line = partialText.slice(0, eolIndex);
             partialText = partialText.slice(eolIndex + 1);
-            if (line.length === 0) {
-                continue;
-            }
+            if (line == "") continue;
 
-            if (line.startsWith("event: ")) {
-                continue;
-            }
-
-            if (line.startsWith("data: ")) {
-                var streamEvent = JSON.parse(line.substring(6)) as LlmStreamEvent;
+            try {
+                const streamEvent = JSON.parse(line) as ContentDelta;
                 eventHandler && eventHandler(streamEvent);
+            } catch (error) {
+                
             }
         }
     
