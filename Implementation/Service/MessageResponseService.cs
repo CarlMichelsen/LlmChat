@@ -22,6 +22,7 @@ public class MessageResponseService(
     ISessionService sessionService,
     IHttpContextAccessor httpContextAccessor) : IMessageResponseService
 {
+    // TODO: Refactor this whole process into a transaction pipeline
     public async Task Respond(
         NewMessageDto newUserMessageDto,
         CancellationToken cancellationToken)
