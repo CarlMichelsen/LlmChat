@@ -1,0 +1,30 @@
+name: CI/CD
+
+on:
+    push:
+        branches: main
+
+jobs:
+    docker-build-publish:
+        name: Build and publish
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout the repo
+              uses: actions/checkout@v3
+
+            - name: Build container image
+              run: docker build -t ${{secrets.REGISTRY}}/${{secrets.IMAGE_NAME}}:latest .
+
+            - name: Install doctl
+              uses: digitalocean/action-doctl@v2
+              with:
+                  token: ${{secrets.DIGITALOCEAN_ACCESS_TOKEN}}
+
+            - name: Log in to DigitalOcean Docker Registry with short-lived credentials
+              run: doctl registry login --expiry-seconds 600
+
+            - name: Remove all old images
+              run: if [ ! -z "$(doctl registry repository list | grep "$(echo ${{secrets.IMAGE_NAME}})")" ]; then doctl registry repository delete-manifest $(echo ${{secrets.IMAGE_NAME}}) $(doctl registry repository list-tags $(echo ${{secrets.IMAGE_NAME}}) | grep -o "sha.*") --force; else echo "No repository"; fi
+            - name: Push image to DigitalOcean Docker Registry
+              run: docker push ${{secrets.REGISTRY}}/${{secrets.IMAGE_NAME}}:latest
