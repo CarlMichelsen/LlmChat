@@ -6,18 +6,18 @@ import { DialogSlice } from "../../util/type/llmChat/conversation/dialogSlice";
 
 export type AppendMessagePayload = {
     conversationId: string,
-    message: Message,
-    respondToMessageId?: string;
+    message: Message
 };
 
 const createSliceFromMessage = (message: Message): DialogSlice => {
     return {
         messages: [message],
         selectedIndex: 0,
+        visible: true,
     } satisfies DialogSlice;
 }
 
-const createOrUpdateSlice = (conversation: Conversation, message: Message, prevMessageId?: string): DialogSlice|null => {
+const createOrUpdateSlice = (conversation: Conversation, message: Message, prevMessageId: string|null): DialogSlice|null => {
     const indexOfPrevSlice = conversation.dialogSlices
         .findIndex(slice => slice.messages.find(m => m.id == prevMessageId));
     
@@ -32,6 +32,7 @@ const createOrUpdateSlice = (conversation: Conversation, message: Message, prevM
         return createSliceFromMessage(message);
     }
     
+    currentSlice.visible = true;
     currentSlice.messages.push(message);
     currentSlice.selectedIndex = currentSlice.messages.length - 1;
     return null;
@@ -45,7 +46,7 @@ export const appendMessageAction = (state: ConversationState, action: PayloadAct
     const newSlice = createOrUpdateSlice(
         state.conversation,
         action.payload.message,
-        action.payload.respondToMessageId);
+        action.payload.message.previousMessageId);
     
     if (newSlice != null)
     {

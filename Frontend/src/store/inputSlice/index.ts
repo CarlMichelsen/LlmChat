@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Message } from '../../util/type/llmChat/conversation/message';
 
 type InputFieldState = {
     ready: boolean;
     text: string;
-    replyToMessageId?: string;
+    editing?: Message;
 }
 
 const initialInputFieldState: InputFieldState = {
@@ -23,6 +24,23 @@ const inputSlice = createSlice({
     name: 'input',
     initialState,
     reducers: {
+        editMessage: (state, action: PayloadAction<{ conversationId: string, editing?: Message }>) => {
+            if (!state.inputField[action.payload.conversationId]) {
+                state.inputField[action.payload.conversationId] = { ...initialInputFieldState };
+            }
+
+            if (!state.inputField[action.payload.conversationId].ready) {
+                return;
+            }
+
+            state.inputField[action.payload.conversationId] = {
+                ready: true,
+                text: action.payload.editing?.content.filter(c => c.contentType === "Text")[0].content ?? "",
+                editing: action.payload.editing,
+            }
+
+            console.log(action.payload.conversationId, action.payload.editing);
+        },
         setInputText: (state, action: PayloadAction<{ conversationId: string, input: string }>) => {
             if (!state.inputField[action.payload.conversationId]) {
                 state.inputField[action.payload.conversationId] = { ...initialInputFieldState };
@@ -41,6 +59,7 @@ const inputSlice = createSlice({
 });
 
 export const {
+    editMessage,
     setInputText,
     setInputReady,
 } = inputSlice.actions;

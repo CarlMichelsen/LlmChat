@@ -6,4 +6,5 @@ export type Message = {
     prompt?: Prompt
     content: Content[];
     completedUtc: string;
+    previousMessageId: string|null;
 }

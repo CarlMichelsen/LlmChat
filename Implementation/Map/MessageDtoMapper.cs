@@ -13,6 +13,7 @@ public static class MessageDtoMapper
             Prompt = messageEntity.Prompt is null ? null : Map(messageEntity.Prompt),
             Content = messageEntity.Content.Select(Map).ToList(),
             CompletedUtc = messageEntity.CompletedUtc,
+            PreviousMessageId = messageEntity.PreviousMessage?.Id.ToString(),
         };
     }
 

@@ -6,5 +6,6 @@ export type ContentDelta = {
     userMessageId?: string;
     content?: StreamContent;
     concluded?: Concluded;
+    summary?: string;
     error?: string;
 }
