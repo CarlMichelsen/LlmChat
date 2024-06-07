@@ -1,9 +1,12 @@
 import store from "../../store";
-import { selectConversation } from "../../store/conversationListSlice";
-import { appendMessage } from "../../store/conversationSlice";
+import { addConversationOption, addConversationOptionSummary, selectConversation } from "../../store/conversationListSlice";
+import { appendMessage, selectMessage } from "../../store/conversationSlice";
 import { AppendMessagePayload } from "../../store/conversationSlice/appendMessage";
+import { setInputReady } from "../../store/inputSlice";
 import { appendStream, clearStream } from "../../store/messageStreamSlice";
+import { ConversationOption } from "../client/conversationOption";
 import { sendMessage } from "../client/sendMessage";
+import { scrollStickToBottom } from "../helpers/scrollStickToBottom";
 import { Concluded } from "../type/llmChat/concluded";
 import { ContentDelta } from "../type/llmChat/contentDelta";
 import { Content } from "../type/llmChat/conversation/content";
@@ -13,7 +16,10 @@ import { NewMessage } from "../type/llmChat/newMessage";
 export class MessageStreamHandler
 {
     ranOnFinally = false;
-    onFinally: () => void
+    onFinally: () => void;
+
+    responseStarted = false;
+    onResponseStarted: () => void;
 
     conversationId?: string;
     userMessageId?: string;
@@ -21,7 +27,8 @@ export class MessageStreamHandler
 
     content: { [key: number]: Content };
 
-    constructor(newMessage: NewMessage, onFinally: () => void) {
+    constructor(newMessage: NewMessage, onResponseStarted: () => void, onFinally: () => void) {
+        this.onResponseStarted = onResponseStarted;
         this.onFinally = onFinally;
         this.content = {};
         this.handleContentDelta = this.handleContentDelta.bind(this);
@@ -30,6 +37,11 @@ export class MessageStreamHandler
     }
 
     public handleContentDelta(contentDelta: ContentDelta) {
+        if (!this.responseStarted) {
+            this.onResponseStarted();
+            this.responseStarted = true;
+        }
+
         if (contentDelta.error) {
             alert(contentDelta.error);
             if (!this.ranOnFinally) {
@@ -41,12 +53,25 @@ export class MessageStreamHandler
         if (!this.conversationId && contentDelta.conversationId) {
             this.conversationId = contentDelta.conversationId;
             store.dispatch(selectConversation(this.conversationId));
+
+
+            if (!this.promptMessage.conversationId) {
+                const conversationOption: ConversationOption = {
+                    id: this.conversationId,
+                    summary: undefined,
+                    lastAppendedUtc: (new Date()).toUTCString(),
+                    createdUtc: (new Date()).toUTCString(),
+                };
+                store.dispatch(addConversationOption(conversationOption));
+                store.dispatch(setInputReady({ conversationId: this.conversationId ?? "none", ready: true } ));
+            }
         }
 
         if (!this.userMessageId && contentDelta.userMessageId) {
             this.userMessageId = contentDelta.userMessageId;
             const payload = this.createAppendMessageModelFromUserMessage(this.userMessageId, this.promptMessage);
             store.dispatch(appendMessage(payload));
+            store.dispatch(selectMessage({ conversationId: this.conversationId!, messageId: this.userMessageId }));
         }
 
         if (contentDelta.content != null) {
@@ -59,6 +84,14 @@ export class MessageStreamHandler
             }
 
             store.dispatch(appendStream({ conversationId: this.conversationId!, content: contentDelta.content }));
+            scrollStickToBottom();
+        }
+
+        if (contentDelta.summary != null) {
+            store.dispatch(addConversationOptionSummary({
+                conversationId: this.conversationId!,
+                summary: contentDelta.summary,
+            }));
         }
 
         if (contentDelta.concluded != null) {
@@ -72,18 +105,18 @@ export class MessageStreamHandler
             .map(key => Number(key))
             .map(key => [key, this.content[key]] satisfies [number, Content])
             .sort(([a], [b]) => a - b);
-        
+
         const msg: Message = {
             id: concluded.messageId,
             prompt: concluded,
             content: sortedList.map(kv => kv[1]),
             completedUtc: (new Date()).toUTCString(),
+            previousMessageId: this.userMessageId!
         }
 
         const payload: AppendMessagePayload = {
             conversationId: this.conversationId!,
             message: msg,
-            respondToMessageId: this.userMessageId!,
         };
 
         store.dispatch(appendMessage(payload));
@@ -102,12 +135,12 @@ export class MessageStreamHandler
             id: userMessageId,
             content: newMessage.content,
             completedUtc: (new Date()).toUTCString(),
+            previousMessageId: newMessage.responseToMessageId
         }
 
         return {
             conversationId: this.conversationId,
             message: msg,
-            respondToMessageId: newMessage.responseToMessageId,
         };
     }
 }

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ConversationOption } from '../../util/client/conversationOption';
+import { getQueryParam } from '../../util/helpers/queryParameter';
 
 type ConversationListState = {
     selectedConversationId?: string;
@@ -9,6 +10,7 @@ type ConversationListState = {
 }
 
 const initialState: ConversationListState = {
+    selectedConversationId: getQueryParam("c") ?? undefined,
     mobileIsOpen: false,
     desktopIsOpen: true,
 };
@@ -26,6 +28,15 @@ const conversationListSlice = createSlice({
         setConversationOptions: (state, action: PayloadAction<ConversationOption[]>) => {
             state.conversationOptions = action.payload;
         },
+        addConversationOption: (state, action: PayloadAction<ConversationOption>) => {
+            state.conversationOptions?.unshift(action.payload);
+        },
+        addConversationOptionSummary: (state, action: PayloadAction<{conversationId: string, summary: string|null}>) => {
+            const conversationOption = state.conversationOptions?.find(co => co.id === action.payload.conversationId);
+            if (conversationOption != null) {
+                conversationOption.summary = action.payload.summary ?? undefined;
+            }
+        },
         selectConversation: (state, action: PayloadAction<string | null>) => {
             state.selectedConversationId = action.payload ?? undefined;
         },
@@ -36,6 +47,8 @@ export const {
     openMobileConversationList,
     openDesktopConversationList,
     setConversationOptions,
+    addConversationOption,
+    addConversationOptionSummary,
     selectConversation
 } = conversationListSlice.actions;
 

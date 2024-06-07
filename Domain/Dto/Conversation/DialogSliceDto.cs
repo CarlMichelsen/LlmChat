@@ -9,4 +9,7 @@ public class DialogSliceDto
 
     [JsonPropertyName("selectedIndex")]
     public required int SelectedIndex { get; init; }
+
+    [JsonPropertyName("visible")]
+    public required bool Visible { get; set; }
 }

@@ -49,7 +49,7 @@ public class ConversationDtoService(
         }
 
         List<DialogSliceDto> dialogSliceList = [];
-        this.MapSlicesRecursive(messageEntities, dialogSliceList, rootMessages, 0);
+        this.MapSlicesRecursive(messageEntities, dialogSliceList, rootMessages, 0, true);
         
         return dialogSliceList;
     }
@@ -58,8 +58,10 @@ public class ConversationDtoService(
         List<MessageEntity> allMessages,
         List<DialogSliceDto> dialogSliceList,
         List<MessageEntity> nextMessages,
-        int index)
+        int index,
+        bool visible)
     {
+        var isVisible = visible;
         if (nextMessages.Count == 0)
         {
             return;
@@ -72,6 +74,7 @@ public class ConversationDtoService(
             {
                 Messages = [],
                 SelectedIndex = 0,
+                Visible = isVisible,
             };
             dialogSliceList.Add(slice);
         }
@@ -84,6 +87,14 @@ public class ConversationDtoService(
         slice.Messages.AddRange(sliceMessages);
         slice.Messages = slice.Messages.DistinctBy(x => x.Id).ToList();
 
+        var prevSlice = dialogSliceList.ElementAtOrDefault(index - 1);
+        if (prevSlice is not null && isVisible)
+        {
+            var exisists = prevSlice.Messages.ElementAt(prevSlice.SelectedIndex).Id == slice.Messages.ElementAt(slice.SelectedIndex).PreviousMessageId;
+            slice.Visible = exisists;
+            isVisible = exisists;
+        }
+
         foreach (var sliceMessage in nextMessages)
         {
             var nextSliceMessages = allMessages
@@ -95,7 +106,8 @@ public class ConversationDtoService(
                 allMessages,
                 dialogSliceList,
                 nextSliceMessages,
-                index + 1);
+                index + 1,
+                isVisible);
         }
     }
 

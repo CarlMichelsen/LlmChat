@@ -27,25 +27,36 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
         return input?.ready ?? true;
     }
 
+    const getEditReplyToMessage = () => {
+        return input?.editing?.previousMessageId ?? null;
+    }
+
     const setReady = (ready: boolean) => {
         store.dispatch(setInputReady({ conversationId: selectedConversationId ?? "none", ready } ));
     }
 
     const setText = (text: string) => {
-        store.dispatch(setInputText({ conversationId: selectedConversationId ?? "none", input: text}))
-    } 
+        if (getTextReadyValue()) {
+            store.dispatch(setInputText({ conversationId: selectedConversationId ?? "none", input: text}))
+        }
+    }
 
     const sendActualMessage = async () => {
         const payload: NewMessage = {
             conversationId: selectedConversationId,
-            responseToMessageId: getLatestMessageId(conversationState.conversation) ?? undefined,
+            responseToMessageId: getEditReplyToMessage() ?? getLatestMessageId(conversationState.conversation) ?? null,
             content: [{ contentType: "Text", content: getTextAreaValue() }],
-            modelIdentifier: "6be7353f-2447-4f6a-93d3-160bca5783ee"
+            modelIdentifier: "ffa85f64-5717-4aaa-b3fc-2c963f66afa7"
         };
 
         setReady(false);
-        new MessageStreamHandler(payload, () => {
-            setText("");
+        new MessageStreamHandler(
+            payload,
+            () => {
+                setText("");
+                setReady(true);
+            },
+            () => {
             setReady(true);
         });
     }
@@ -53,15 +64,18 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
     const handleSendOnEnter = (keyEvent: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (!keyEvent.shiftKey && keyEvent.key === "Enter") {
             keyEvent.preventDefault();
-            sendActualMessage();
+
+            if (!messageStream?.streaming) {
+                sendActualMessage();
+            }
         }
     }
 
     return (
-        <div className="sticky bottom-0 w-full h-36">
+        <div className="sticky bottom-0 chat-width h-36">
             <textarea 
-                disabled={messageStream?.streaming || !getTextReadyValue()}
-                className="block w-full lg:w-[750px] md:w-[500px] h-32 mx-auto resize-none bg-zinc-400 disabled:bg-zinc-600 p-1 md:p-2"
+                className={
+                    `block w-full h-32 mx-auto resize-none ${messageStream?.streaming === true && "bg-blue-400"} ${!getTextReadyValue() === true && "border-none"} border border-black rounded-md disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none`}
                 onKeyDown={handleSendOnEnter}
                 value={getTextAreaValue()}
                 onChange={(e) => setText(e.target.value)}

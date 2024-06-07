@@ -25,8 +25,9 @@ export const sendMessage = async (message: NewMessage, eventHandler?: (streamEve
             console.log('Stream complete');
             return; 
         }
-    
-        partialText += decoder.decode(value);
+
+        const decoded = decoder.decode(value);
+        partialText += decoded;
     
         let eolIndex;
         while ((eolIndex = partialText.indexOf('\n')) >= 0) {

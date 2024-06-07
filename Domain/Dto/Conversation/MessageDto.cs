@@ -15,4 +15,7 @@ public class MessageDto
 
     [JsonPropertyName("completedUtc")]
     public required DateTime CompletedUtc { get; init; }
+
+    [JsonPropertyName("previousMessageId")]
+    public required string? PreviousMessageId { get; init; }
 }
