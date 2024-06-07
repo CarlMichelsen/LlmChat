@@ -38,8 +38,6 @@ const inputSlice = createSlice({
                 text: action.payload.editing?.content.filter(c => c.contentType === "Text")[0].content ?? "",
                 editing: action.payload.editing,
             }
-
-            console.log(action.payload.conversationId, action.payload.editing);
         },
         setInputText: (state, action: PayloadAction<{ conversationId: string, input: string }>) => {
             if (!state.inputField[action.payload.conversationId]) {

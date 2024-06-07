@@ -46,10 +46,8 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
             conversationId: selectedConversationId,
             responseToMessageId: getEditReplyToMessage() ?? getLatestMessageId(conversationState.conversation) ?? null,
             content: [{ contentType: "Text", content: getTextAreaValue() }],
-            modelIdentifier: "6be7353f-2447-4f6a-93d3-160bca5783ee"
+            modelIdentifier: "ffa85f64-5717-4aaa-b3fc-2c963f66afa7"
         };
-
-        console.log("PAYLOAD", payload);
 
         setReady(false);
         new MessageStreamHandler(
@@ -74,10 +72,10 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
     }
 
     return (
-        <div className="sticky bottom-0 w-full h-36">
+        <div className="sticky bottom-0 chat-width h-36">
             <textarea 
                 className={
-                    `block w-full h-32 mx-auto resize-none ${messageStream?.streaming === true ? "bg-blue-400" : "bg-zinc-400"} disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none`}
+                    `block w-full h-32 mx-auto resize-none ${messageStream?.streaming === true && "bg-blue-400"} ${!getTextReadyValue() === true && "border-none"} border border-black rounded-md disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none`}
                 onKeyDown={handleSendOnEnter}
                 value={getTextAreaValue()}
                 onChange={(e) => setText(e.target.value)}

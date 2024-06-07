@@ -29,7 +29,7 @@ const conversationListSlice = createSlice({
             state.conversationOptions = action.payload;
         },
         addConversationOption: (state, action: PayloadAction<ConversationOption>) => {
-            state.conversationOptions?.push(action.payload);
+            state.conversationOptions?.unshift(action.payload);
         },
         addConversationOptionSummary: (state, action: PayloadAction<{conversationId: string, summary: string|null}>) => {
             const conversationOption = state.conversationOptions?.find(co => co.id === action.payload.conversationId);

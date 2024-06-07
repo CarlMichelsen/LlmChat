@@ -17,9 +17,13 @@ const Conversation: React.FC = () => {
     return (
         <>
         <FetchLogicComponent />
-        <div className="h-full mx-auto container overflow-y-scroll relative" id="conversation-scroll-chat">
+        <div className="h-full overflow-y-scroll" id="conversation-scroll-chat">
             {conversationState.conversation
-                ? <MessageList conversationId={conversationState.conversation?.id} dialogSlices={conversationState.conversation.dialogSlices} />
+                ? (
+                <div className="chat-width relative">
+                    <MessageList conversationId={conversationState.conversation?.id} dialogSlices={conversationState.conversation.dialogSlices} />
+                </div>
+                )
                 : <div>No conversation selected</div>}
 
             <Input selectedConversationId={conversationState.conversation?.id} />

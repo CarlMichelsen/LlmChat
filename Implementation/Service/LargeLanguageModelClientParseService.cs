@@ -1,9 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using Domain.Conversation;
+﻿using Domain.Conversation;
 using Domain.Dto.Chat.Stream;
 using Domain.Dto.Conversation;
-using Domain.Entity;
-using Domain.Exception;
 using Interface.Service;
 using LargeLanguageModelClient;
 using LargeLanguageModelClient.Dto.Model;

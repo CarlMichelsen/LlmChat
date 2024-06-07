@@ -9,12 +9,12 @@ import DisplayMessageComponent from "./DisplayMessageComponent";
 type MessageComponentProps = {
     conversationId: string;
     dialogSlice: DialogSlice;
+    index: number;
 }
 
-const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conversationId }) => {
+const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conversationId, index }) => {
     const userState = useSelector((state: RootApplicationState) => state.user);
     const msg = dialogSlice.messages[dialogSlice.selectedIndex];
-
     const imgUrl = msg.prompt ? robotIcon : userState.user!.avatarUrl;
 
     const incrementSelectedMessageSliceId = (increment: number) => {
@@ -32,8 +32,8 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conver
                 isUser={!msg.prompt}
                 displayName={msg.prompt?.modelName ?? userState.user!.name}
                 imageUrl={imgUrl}
-                inputTokens={0}
-                outputTokens={0}
+                inputTokens={msg.prompt?.inputTokens ?? 0}
+                outputTokens={msg.prompt?.outputTokens ?? 0}
                 content={msg.content} />
 
             {!msg.prompt && <div className="grid grid-cols-[15px_30px_15px_50px]">
@@ -48,7 +48,8 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conver
                     onMouseDown={() => incrementSelectedMessageSliceId(1)}>&gt;</button>
                 <div>
                     <button
-                        className="ml-4 hover:underline"
+                        disabled={index === 0}
+                        className="ml-4 hover:underline disabled:text-zinc-400 disabled:hover:no-underline"
                         onMouseDown={() => store.dispatch(editMessage({ conversationId, editing: msg }))}>edit</button>
                 </div>
             </div>}
