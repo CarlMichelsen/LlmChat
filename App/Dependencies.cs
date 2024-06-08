@@ -9,6 +9,7 @@ using Interface.Repository;
 using Interface.Service;
 using LargeLanguageModelClient;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
 namespace App;
@@ -26,7 +27,10 @@ public static class Dependencies
 
         // Handler
         builder.Services
-            .AddScoped<IMessageHandler, MessageHandler>();
+            .AddScoped<ISessionHandler, SessionHandler>()
+            .AddScoped<IModelHandler, ModelHandler>()
+            .AddScoped<IMessageHandler, MessageHandler>()
+            .AddScoped<IConversationHandler, ConversationHandler>();
 
         // Service
         builder.Services
@@ -74,6 +78,14 @@ public static class Dependencies
         {
             options.Configuration = redisConfiguration.ConnectionString;
             options.InstanceName = redisConfiguration.InstanceName;
+        });
+
+        // Compression
+        builder.Services.AddResponseCompression(options =>
+        {
+            options.Providers.Add<GzipCompressionProvider>();
+            options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                new[] { "application/javascript", "text/css", "text/html", "text/json", "text/plain", "application/json" });
         });
 
         // CORS

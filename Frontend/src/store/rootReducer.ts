@@ -1,4 +1,5 @@
 import { combineReducers } from '@reduxjs/toolkit';
+import modelReducer from "./modelSlice";
 import userReducer from "./userSlice";
 import conversationListReducer from './conversationListSlice';
 import conversationReducer from './conversationSlice';
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
     conversation: conversationReducer,
     conversationList: conversationListReducer,
     user: userReducer,
+    models: modelReducer,
 });
 
 export default rootReducer;

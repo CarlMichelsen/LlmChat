@@ -9,35 +9,57 @@ public class ModelService(
     ILargeLanguageModelClient largeLanguageModelClient,
     ICacheService cacheService) : IModelService
 {
+    public const string ModelsCacheKey = "large-language-model-list";
+    private List<LlmModelDto>? llmModelDtos = null;
+
     public async Task<LlmModelDto?> GetModel(Guid modelIdentifier)
     {
-        var cacheKey = this.GenerateCacheKey(modelIdentifier);
-        var cachedModel = await cacheService.GetJson<LlmModelDto>(cacheKey);
-        if (cachedModel is not null)
+        var models = await this.GetModelList();
+        if (models is null)
         {
-            return cachedModel;
+            return default;
         }
 
-        var model = await largeLanguageModelClient.GetModel(modelIdentifier);
-        if (model is null)
-        {
-            return null;
-        }
-
-        if (!model.Ok)
-        {
-            return null;
-        }
-
-        await cacheService.SetJson(cacheKey, model.Data, new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
-        });
-        return model.Data;
+        return models.FirstOrDefault(m => m.Id == modelIdentifier);
     }
 
-    private string GenerateCacheKey(Guid modelIdentifier)
+    public async Task<List<LlmModelDto>?> GetAllModels()
     {
-        return $"model-identifier-{modelIdentifier}";
+        var models = await this.GetModelList();
+        if (models is null)
+        {
+            return default;
+        }
+
+        return models;
+    }
+
+    private async Task<List<LlmModelDto>?> GetModelList()
+    {
+        if (this.llmModelDtos is not null)
+        {
+            return this.llmModelDtos;
+        }
+
+        var cachedModels = await cacheService.GetJson<List<LlmModelDto>>(ModelsCacheKey);
+        if (cachedModels is not null)
+        {
+            this.llmModelDtos = cachedModels;
+            return this.llmModelDtos;
+        }
+
+        var response = await largeLanguageModelClient.GetAllModels();
+        if (response.Ok)
+        {
+            this.llmModelDtos = response.Data!;
+            await cacheService.SetJson(ModelsCacheKey, this.llmModelDtos, new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+            });
+            
+            return this.llmModelDtos;
+        }
+
+        return default;
     }
 }

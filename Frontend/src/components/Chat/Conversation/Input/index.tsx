@@ -1,9 +1,10 @@
 import { useSelector } from "react-redux";
 import store, { RootApplicationState } from "../../../../store";
-import { setInputReady, setInputText } from "../../../../store/inputSlice";
+import { cancelEdit, setInputReady, setInputText } from "../../../../store/inputSlice";
 import { getLatestMessageId } from "../../../../util/helpers/getLatestMessageId";
 import { NewMessage } from "../../../../util/type/llmChat/newMessage";
 import { MessageStreamHandler } from "../../../../util/handler/messageStreamHandler";
+import TextField from "./TextField";
 
 type InputProps = {
     selectedConversationId?: string;
@@ -16,8 +17,9 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
     const inputState = useSelector((state: RootApplicationState) => state.input);
     const input = inputState.inputField[selectedConversationId ?? "none"]
 
+    const modelState = useSelector((state: RootApplicationState) => state.models);
+
     const conversationState = useSelector((state: RootApplicationState) => state.conversation);
-    
 
     const getTextAreaValue = () => {
         return input?.text ?? "";
@@ -27,8 +29,8 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
         return input?.ready ?? true;
     }
 
-    const getEditReplyToMessage = () => {
-        return input?.editing?.previousMessageId ?? null;
+    const getEditingMessage = () => {
+        return input?.editing ?? null;
     }
 
     const setReady = (ready: boolean) => {
@@ -44,9 +46,9 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
     const sendActualMessage = async () => {
         const payload: NewMessage = {
             conversationId: selectedConversationId,
-            responseToMessageId: getEditReplyToMessage() ?? getLatestMessageId(conversationState.conversation) ?? null,
+            responseToMessageId: getEditingMessage()?.previousMessageId ?? getLatestMessageId(conversationState.conversation) ?? null,
             content: [{ contentType: "Text", content: getTextAreaValue() }],
-            modelIdentifier: "ffa85f64-5717-4aaa-b3fc-2c963f66afa7"
+            modelIdentifier: modelState.selectedModelId,
         };
 
         setReady(false);
@@ -56,31 +58,25 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
                 setText("");
                 setReady(true);
             },
-            () => {
-            setReady(true);
-        });
+            () => setReady(true));
     }
 
-    const handleSendOnEnter = (keyEvent: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (!keyEvent.shiftKey && keyEvent.key === "Enter") {
-            keyEvent.preventDefault();
-
-            if (!messageStream?.streaming) {
-                sendActualMessage();
-            }
-        }
+    const handleCancelEdit = () => {
+        store.dispatch(cancelEdit(selectedConversationId!));
+        setText("");
     }
 
     return (
         <div className="sticky bottom-0 chat-width h-36">
-            <textarea 
-                className={
-                    `block w-full h-32 mx-auto resize-none ${messageStream?.streaming === true && "bg-blue-400"} ${!getTextReadyValue() === true && "border-none"} border border-black rounded-md disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none`}
-                onKeyDown={handleSendOnEnter}
-                value={getTextAreaValue()}
-                onChange={(e) => setText(e.target.value)}
-                name="conversation_chatbox"
-                id="chatbox"></textarea>
+            <TextField
+                ready={input?.ready ?? true}
+                setReady={setReady}
+                text={input?.text ?? ""}
+                setText={setText}
+                editingMessage={input?.editing}
+                cancelEdit={handleCancelEdit}
+                streaming={messageStream?.streaming === true}
+                sendMessage={sendActualMessage} />
         </div>
     );
 }
