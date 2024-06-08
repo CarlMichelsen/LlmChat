@@ -5,7 +5,7 @@ namespace Interface.Handler;
 
 public interface IConversationHandler
 {
+    Task<ServiceResponse<ConversationDto>> GetConversation(long conversationId);
+    
     Task<ServiceResponse<List<ConversationOptionDto>>> GetConversationList();
-
-    Task<ServiceResponse<object>> GetConversation();
 }

@@ -24,6 +24,14 @@ const inputSlice = createSlice({
     name: 'input',
     initialState,
     reducers: {
+        cancelEdit: (state, action: PayloadAction<string>) => {
+            if (!state.inputField[action.payload]) {
+                state.inputField[action.payload] = { ...initialInputFieldState };
+                return;
+            }
+
+            delete state.inputField[action.payload].editing;
+        },
         editMessage: (state, action: PayloadAction<{ conversationId: string, editing?: Message }>) => {
             if (!state.inputField[action.payload.conversationId]) {
                 state.inputField[action.payload.conversationId] = { ...initialInputFieldState };
@@ -57,6 +65,7 @@ const inputSlice = createSlice({
 });
 
 export const {
+    cancelEdit,
     editMessage,
     setInputText,
     setInputReady,

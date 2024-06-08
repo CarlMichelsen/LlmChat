@@ -7,11 +7,23 @@ using Interface.Service;
 namespace Implementation.Handler;
 
 public class ConversationHandler(
+    IConversationDtoService conversationDtoService,
     IConversationOptionService conversationOptionService) : IConversationHandler
 {
-    public Task<ServiceResponse<object>> GetConversation()
+    public async Task<ServiceResponse<ConversationDto>> GetConversation(long conversationId)
     {
-        throw new NotImplementedException();
+        var conversationDtoResult = await conversationDtoService
+            .GetConversationDto(conversationId);
+        if (conversationDtoResult.IsError)
+        {
+            var err = MapError("Failed to get conversationDto", conversationDtoResult.Error!);
+            var errRes = new ServiceResponse<ConversationDto>(err);
+            return errRes;
+        }
+        
+        var conv = conversationDtoResult.Unwrap();
+        var res = new ServiceResponse<ConversationDto>(conv);
+        return res;
     }
 
     public async Task<ServiceResponse<List<ConversationOptionDto>>> GetConversationList()
@@ -26,13 +38,13 @@ public class ConversationHandler(
         return new ServiceResponse<List<ConversationOptionDto>>(conversationOptionsResult.Unwrap());
     }
 
-    private static string MapError(string error, Exception? e = default)
+    private static string MapError(string initial, Exception e)
     {
         if (e is SafeUserFeedbackException safe)
         {
-            return $"{error} -> {safe.Message}";
+            return $"{initial} -> {safe.Message}";
         }
 
-        return error;
+        return initial;
     }
 }

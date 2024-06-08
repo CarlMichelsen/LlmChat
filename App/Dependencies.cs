@@ -26,7 +26,9 @@ public static class Dependencies
 
         // Handler
         builder.Services
-            .AddScoped<IMessageHandler, MessageHandler>();
+            .AddScoped<IModelHandler, ModelHandler>()
+            .AddScoped<IMessageHandler, MessageHandler>()
+            .AddScoped<IConversationHandler, ConversationHandler>();
 
         // Service
         builder.Services
