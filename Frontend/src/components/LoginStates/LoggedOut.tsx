@@ -20,7 +20,7 @@ const LogedOut: React.FC = () => {
                         Log in with GitHub
                     </button>
 
-                    <button onClick={() => navigateToLoginPage("Development")}>development</button>
+                    {import.meta.env.MODE == "development" && <button onClick={() => navigateToLoginPage("Development")}>development</button>}
                 </div>
             </div>
         </div>

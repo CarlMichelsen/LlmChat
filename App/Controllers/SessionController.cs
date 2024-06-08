@@ -1,7 +1,7 @@
 ﻿using Domain.Configuration;
 using Domain.Dto;
 using Domain.Session;
-using Interface.Service;
+using Interface.Handler;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,33 +10,20 @@ namespace App.Controllers;
 [Route("api/v1/[controller]")]
 [ApiController]
 public class SessionController(
-    ISessionService sessionService) : ControllerBase
+    ISessionHandler sessionHandler) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<ServiceResponse<UserData>>> GetSessionData()
     {
-        var sessionData = await sessionService.GetSessionData();
-        if (sessionData.IsError)
-        {
-            var notLoggedInRes = new ServiceResponse<UserData>("User not logged in");
-            return this.Ok(notLoggedInRes);
-        }
-
-        var loggedInRes = new ServiceResponse<UserData>(sessionData.Unwrap().User);
-        return this.Ok(loggedInRes);
+        var sessionData = await sessionHandler.GetSessionData();
+        return this.Ok(sessionData);
     }
 
     [HttpDelete]
     [Authorize(ApplicationConstants.SessionAuthenticationScheme)]
     public async Task<ActionResult<ServiceResponse<bool>>> RemoveSessionData()
     {
-        var sessionData = await sessionService.RemoveSessionData();
-        if (sessionData.IsError)
-        {
-            var failureRes = new ServiceResponse<UserData>("Failed to logout user");
-            return this.Ok(failureRes);
-        }
-
-        return this.Ok(new ServiceResponse<bool>(true));
+        var removed = await sessionHandler.RemoveSessionData();
+        return this.Ok(removed);
     }
 }

@@ -17,6 +17,8 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
     const inputState = useSelector((state: RootApplicationState) => state.input);
     const input = inputState.inputField[selectedConversationId ?? "none"]
 
+    const modelState = useSelector((state: RootApplicationState) => state.models);
+
     const conversationState = useSelector((state: RootApplicationState) => state.conversation);
 
     const getTextAreaValue = () => {
@@ -46,7 +48,7 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
             conversationId: selectedConversationId,
             responseToMessageId: getEditingMessage()?.previousMessageId ?? getLatestMessageId(conversationState.conversation) ?? null,
             content: [{ contentType: "Text", content: getTextAreaValue() }],
-            modelIdentifier: "2370891f-9593-4ba6-be41-56e47fa6083f"
+            modelIdentifier: modelState.selectedModelId,
         };
 
         setReady(false);
@@ -56,9 +58,7 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
                 setText("");
                 setReady(true);
             },
-            () => {
-            setReady(true);
-        });
+            () => setReady(true));
     }
 
     const handleCancelEdit = () => {

@@ -24,13 +24,14 @@ const TextField: React.FC<TextFieldProps> = ({ ready, streaming, sendMessage, te
 
     return (
         <div className="px-2 grid grid-cols-[1fr_50px]">
+            <label htmlFor="chatbox" className="sr-only">Send message here</label>
             <textarea 
                 className={
                     `block w-full h-32 mx-auto resize-none ${streaming && "bg-blue-400"} ${!ready && "border-none"} border border-black rounded-md disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none ${!editingMessage && "col-span-2"}`}
                 onKeyDown={handleSendOnEnter}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                name="conversation_chatbox"
+                name="conversation-chatbox"
                 id="chatbox"></textarea>
 
             {editingMessage && (<button className="h-full w-full" onMouseDown={() => cancelEdit()}>Stop Editing</button>)}

@@ -4,8 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "cross-env VITE_APP_ENV=development vite --port 5539",
-    "build": "tsc && cross-env VITE_APP_ENV=production vite build",
+    "dev": "VITE_APP_ENV=development vite --port 5539",
+    "build": "tsc && VITE_APP_ENV=production vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "VITE_APP_ENV=production vite preview"
   },
@@ -50,7 +50,6 @@
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.19",
-    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
