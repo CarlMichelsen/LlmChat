@@ -1,4 +1,5 @@
 ﻿using Domain.Entity;
+using Domain.Entity.Id;
 using Microsoft.EntityFrameworkCore;
 
 namespace Implementation.Database;
@@ -22,10 +23,36 @@ public sealed class ApplicationContext : DbContext
 
     public DbSet<MessageEntity> Messages { get; init; }
 
+    public DbSet<ContentEntity> Content { get; init; }
+
     public DbSet<PromptEntity> Prompts { get; init; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("LlmChat");
+
+        modelBuilder.Entity<ConversationEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new ConversationEntityId(guid));
+        });
+
+        modelBuilder.Entity<MessageEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new MessageEntityId(guid));
+        });
+
+        modelBuilder.Entity<ContentEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new ContentEntityId(guid));
+        });
+
+        modelBuilder.Entity<PromptEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new PromptEntityId(guid));
+        });
     }
 }

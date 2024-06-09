@@ -1,5 +1,6 @@
 ﻿using Domain.Abstraction;
 using Domain.Entity;
+using Domain.Entity.Id;
 using Domain.Exception;
 using Implementation.Database;
 using Interface.Repository;
@@ -10,12 +11,13 @@ namespace Implementation.Service;
 public class GetOrCreateConversationRepository(
     ApplicationContext applicationContext) : IGetOrCreateConversationRepository
 {
-    public async Task<Result<ConversationEntity>> GetOrCreateConversation(Guid creatorIdentifier, long? conversationId)
+    public async Task<Result<ConversationEntity>> GetOrCreateConversation(Guid creatorIdentifier, ConversationEntityId? conversationId)
     {
         if (conversationId is null)
         {
             var conv = new ConversationEntity
             {
+                Id = new ConversationEntityId(Guid.NewGuid()),
                 CreatorIdentifier = creatorIdentifier,
                 Messages = [],
                 LastAppendedUtc = DateTime.UtcNow,
@@ -28,7 +30,7 @@ public class GetOrCreateConversationRepository(
         }
         else
         {
-            var conv = await this.GetConversationEntity(creatorIdentifier, (long)conversationId!);
+            var conv = await this.GetConversationEntity(creatorIdentifier, conversationId!);
             if (conv is null)
             {
                 return new SafeUserFeedbackException("Conversation not found");
@@ -40,7 +42,7 @@ public class GetOrCreateConversationRepository(
 
     private Task<ConversationEntity?> GetConversationEntity(
         Guid creatorIdentifier,
-        long conversationId)
+        ConversationEntityId conversationId)
     {
         return applicationContext.Conversations
             .Where(c => c.CreatorIdentifier == creatorIdentifier && c.Id == conversationId)

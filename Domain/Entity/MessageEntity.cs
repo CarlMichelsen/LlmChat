@@ -1,8 +1,12 @@
-﻿namespace Domain.Entity;
+﻿using Domain.Entity.Id;
+
+namespace Domain.Entity;
 
 public class MessageEntity
 {
-    public long Id { get; set; }
+    public required MessageEntityId Id { get; init; }
+
+    public required bool IsUserMessage { get; init; }
 
     public required List<ContentEntity> Content { get; init; }
 

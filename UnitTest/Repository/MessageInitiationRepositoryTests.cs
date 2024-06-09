@@ -1,10 +1,7 @@
-﻿using Domain.Conversation;
-using Domain.Dto.Chat;
-using Domain.Dto.Chat.Stream;
-using Domain.Dto.Conversation;
-using Domain.Entity;
+﻿using Domain.Entity;
+using Domain.Entity.Id;
+using Domain.Pipeline.SendMessage;
 using Implementation.Repository;
-using LargeLanguageModelClient.Dto.Model;
 using Microsoft.EntityFrameworkCore;
 using UnitTest.Database;
 
@@ -12,26 +9,6 @@ namespace UnitTest.Repository;
 
 public class MessageInitiationRepositoryTests : TestDatabase
 {
-    private const string SeededConversationId = "1";
-    private const string SeededInitialMessageId = "1";
-    private const string SeededSecondMessageId = "2";
-
-    private readonly LlmModelDto mockModel = new(
-        Guid.NewGuid(),
-        true,
-        "test provider",
-        new LlmPriceDto(Guid.NewGuid(), 100, 150),
-        "test-mode-01",
-        4000,
-        128000,
-        false,
-        false,
-        false,
-        "Test Model",
-        "yeehaw description",
-        DateTime.UtcNow);
-
-    private readonly Guid creatorIdentifier = Guid.NewGuid();
     private readonly MessageInitiationRepository sut;
 
     public MessageInitiationRepositoryTests()
@@ -44,32 +21,35 @@ public class MessageInitiationRepositoryTests : TestDatabase
     {
         // Arrange
         await this.ExecuteDatabaseSeed();
-        var content = new MessageContentDto
+        var content = new ContentEntity
         {
-            ContentType = "Text",
+            Id = new ContentEntityId(Guid.NewGuid()),
+            ContentType = MessageContentType.Text,
             Content = "Tell me a story!",
         };
 
-        var newUserMessageDto = new NewMessageDto(
-            ConversationId: SeededConversationId,
-            ResponseToMessageId: SeededSecondMessageId,
-            Content: [content],
-            ModelIdentifier: Guid.Parse("2370891f-9593-4ba6-be41-56e47fa6083f"));
+        var validatedSendMessageData = new ValidatedSendMessageData
+        {
+            RequestConversationId = ConversationMockDataGenerator.SeededConversationId,
+            ResponseToMessageId = ConversationMockDataGenerator.SeededSecondMessageId,
+            Content = [content],
+            SelectedModel = ConversationMockDataGenerator.MockModel,
+        };
 
         // Act
         var foundConversation = await this.Context.Conversations
-            .Where(c => c.Id.ToString() == SeededConversationId)
+            .Where(c => c.Id == ConversationMockDataGenerator.SeededConversationId)
             .Include(c => c.Messages)
             .FirstAsync(CancellationToken.None);
         var result = await this.sut.InitiateMessage(
-            newUserMessageDto,
-            this.mockModel,
+            validatedSendMessageData,
             foundConversation,
+            default,
             default);
         await this.Context.SaveChangesAsync();
 
         // Assert
-        Assert.IsType<NewMessageData>(result.Unwrap());
+        Assert.IsType<MessageEntity>(result.Unwrap());
         Assert.True(result.IsSuccess);
         Assert.IsNotType<Exception>(result.Error);
         Assert.Null(result.Error);
@@ -84,34 +64,7 @@ public class MessageInitiationRepositoryTests : TestDatabase
 
     protected override void SeedDatabase()
     {
-        var m1 = new MessageEntity
-        {
-            Id = long.Parse(SeededInitialMessageId),
-            Content = [new ContentEntity { ContentType = MessageContentType.Text, Content = "Hello" }],
-            Prompt = default,
-            PreviousMessage = default,
-            CompletedUtc = DateTime.UtcNow,
-        };
-
-        var m2 = new MessageEntity
-        {
-            Id = long.Parse(SeededSecondMessageId),
-            Content = [new ContentEntity { ContentType = MessageContentType.Text, Content = "Hi! how can i help you?" }],
-            Prompt = default,
-            PreviousMessage = default,
-            CompletedUtc = DateTime.UtcNow,
-        };
-
-        var conv = new ConversationEntity
-        {
-            Id = long.Parse(SeededConversationId),
-            CreatorIdentifier = this.creatorIdentifier,
-            Messages =
-            [m1, m2],
-            LastAppendedUtc = DateTime.UtcNow,
-            CreatedUtc = DateTime.UtcNow,
-        };
-
+        var conv = ConversationMockDataGenerator.GenerateSampleConversation();
         this.Context.Conversations.Add(conv);
         this.Context.SaveChanges();
     }

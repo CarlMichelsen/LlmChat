@@ -1,16 +1,16 @@
 ﻿using Domain.Abstraction;
 using Domain.Conversation;
-using Domain.Dto.Chat;
 using Domain.Entity;
-using LargeLanguageModelClient.Dto.Model;
+using Domain.Entity.Id;
+using Domain.Pipeline.SendMessage;
 
 namespace Interface.Repository;
 
 public interface IMessageInitiationRepository
 {
-    Task<Result<NewMessageData>> InitiateMessage(
-        NewMessageDto newUserMessageDto,
-        LlmModelDto model,
+    Task<Result<MessageEntity>> InitiateMessage(
+        ValidatedSendMessageData newUserMessageDto,
         ConversationEntity conversationEntity,
+        MessageEntityId? messageEntityId,
         StreamUsage? llmStreamTotalUsage);
 }

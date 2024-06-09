@@ -1,10 +1,11 @@
 ﻿using Domain.Dto.Conversation;
+using Domain.Entity.Id;
 
 namespace Domain.Conversation;
 
 public class ConcludedMessage
 {
-    public required long ConversationId { get; init; }
+    public required ConversationEntityId ConversationId { get; init; }
     
     public required string ProviderPromptIdentifier { get; init; }
 
@@ -20,7 +21,7 @@ public class ConcludedMessage
 
     public required List<MessageContentDto> Content { get; init; }
 
-    public required NewMessageData NewMessageData { get; init; }
+    public required NewMessageData InitialNewMessageData { get; init; }
 
     public required StreamUsage? StreamUsage { get; init; }
 }

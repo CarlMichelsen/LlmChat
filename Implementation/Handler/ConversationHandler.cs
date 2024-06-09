@@ -1,5 +1,6 @@
 ﻿using Domain.Dto;
 using Domain.Dto.Conversation;
+using Domain.Entity.Id;
 using Domain.Exception;
 using Interface.Handler;
 using Interface.Service;
@@ -10,7 +11,7 @@ public class ConversationHandler(
     IConversationDtoService conversationDtoService,
     IConversationOptionService conversationOptionService) : IConversationHandler
 {
-    public async Task<ServiceResponse<ConversationDto>> GetConversation(long conversationId)
+    public async Task<ServiceResponse<ConversationDto>> GetConversation(ConversationEntityId conversationId)
     {
         var conversationDtoResult = await conversationDtoService
             .GetConversationDto(conversationId);

@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Conversation;
 using Domain.Entity;
+using Domain.Entity.Id;
 
 namespace Implementation.Map;
 
@@ -36,6 +37,16 @@ public static class MessageDtoMapper
         {
             ContentType = Enum.GetName(contentEntity.ContentType)!,
             Content = contentEntity.Content,
+        };
+    }
+
+    public static ContentEntity Map(MessageContentDto messageContentDto, ContentEntityId? contentEntityId = default)
+    {
+        return new ContentEntity
+        {
+            Id = contentEntityId ?? new ContentEntityId(Guid.NewGuid()),
+            ContentType = Enum.Parse<MessageContentType>(messageContentDto.ContentType),
+            Content = messageContentDto.Content,
         };
     }
 }

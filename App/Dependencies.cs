@@ -1,10 +1,14 @@
-﻿using App.Security;
+﻿using App.Extensions;
+using App.Security;
 using Domain.Configuration;
+using Domain.Pipeline.SendMessage;
 using Implementation.Database;
 using Implementation.Handler;
+using Implementation.Pipeline;
 using Implementation.Repository;
 using Implementation.Service;
 using Interface.Handler;
+using Interface.Pipeline;
 using Interface.Repository;
 using Interface.Service;
 using LargeLanguageModelClient;
@@ -32,13 +36,18 @@ public static class Dependencies
             .AddScoped<IMessageHandler, MessageHandler>()
             .AddScoped<IConversationHandler, ConversationHandler>();
 
+        // Pipeline
+        builder.Services
+            .RegisterPipelineSteps()
+            .AddTransient<ITransactionPipeline<ApplicationContext, SendMessagePipelineData>, SendMessagePipeline>();
+
         // Service
         builder.Services
             .AddScoped<ICacheService, CacheService>()
             .AddScoped<ISessionService, SessionService>()
             .AddScoped<IModelService, ModelService>()
+            .AddScoped<IStreamWriterService, StreamWriterService>()
             .AddScoped<ISummaryService, SummaryService>()
-            .AddScoped<IMessageResponseService, MessageResponseService>()
             .AddScoped<IConversationDtoService, ConversationDtoService>()
             .AddScoped<IConversationOptionService, ConversationOptionService>();
         
@@ -46,7 +55,8 @@ public static class Dependencies
         builder.Services
             .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
             .AddScoped<IMessageInitiationRepository, MessageInitiationRepository>()
-            .AddScoped<IConversationRepository, ConversationRepository>()
+            .AddScoped<IConversationReadRepository, ConversationReadRepository>()
+            .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
             .AddScoped<IConversationReadRepository, ConversationReadRepository>();
         
         // Client
@@ -85,7 +95,7 @@ public static class Dependencies
         {
             options.Providers.Add<GzipCompressionProvider>();
             options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                new[] { "application/javascript", "text/css", "text/html", "text/json", "text/plain", "application/json" });
+                ["application/javascript", "text/css", "text/html", "text/json", "text/plain", "application/json"]);
         });
 
         // CORS
