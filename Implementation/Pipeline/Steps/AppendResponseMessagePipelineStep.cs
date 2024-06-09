@@ -1,4 +1,5 @@
 ﻿using Domain.Abstraction;
+using Domain.Entity.Id;
 using Domain.Pipeline.SendMessage;
 using Implementation.Database;
 using Implementation.Map;
@@ -47,6 +48,7 @@ public class AppendResponseMessagePipelineStep(
         var responseInitiationResult = await messageInitiationRepository.InitiateMessage(
             validatedResponseMessageData,
             data.Conversation,
+            data.NextMessageIdentifier == Guid.Empty ? default : new MessageEntityId(data.NextMessageIdentifier),
             data.StreamUsage);
         if (responseInitiationResult.IsError)
         {

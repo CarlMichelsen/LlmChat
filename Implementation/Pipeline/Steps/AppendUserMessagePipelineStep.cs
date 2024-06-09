@@ -29,6 +29,7 @@ public class AppendUserMessagePipelineStep(
         var messageResult = await messageInitiationRepository.InitiateMessage(
             data.ValidatedSendMessageData,
             data.Conversation,
+            default,
             default);
         if (messageResult.IsError)
         {
@@ -36,7 +37,7 @@ public class AppendUserMessagePipelineStep(
         }
 
         var message = messageResult.Unwrap();
-        await streamWriterService.WriteIds(default, message.Id);
+        await streamWriterService.WriteIds(data.Conversation.Id, message.Id);
         data.UserMessage = message;
         return data;
     }

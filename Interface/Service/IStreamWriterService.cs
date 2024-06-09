@@ -8,9 +8,11 @@ public interface IStreamWriterService
 {
     Task WriteContentDelta(ContentDeltaDto contentDeltaDto);
 
-    Task WriteConclusion(ContentConcludedDto contentConcludedDto);
+    Task WriteConclusion(ConversationEntityId conversationId, ContentConcludedDto contentConcludedDto);
+    
+    Task WriteSummary(ConversationEntityId conversationId, string summary);
 
-    Task WriteIds(ConversationEntityId? conversationEntityId, MessageEntityId? messageEntityId);
+    Task WriteIds(ConversationEntityId conversationEntityId, MessageEntityId? messageEntityId);
 
     Task<SafeUserFeedbackException> WriteError(string error, Exception? potentialSafeUserException = default);
 }

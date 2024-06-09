@@ -71,6 +71,7 @@ public class StreamResponseMessagePipelineStep(
         var conclusion = await this.concludedTask.Task;
         this.concludedTask = default;
 
+        var messageIdentifier = Guid.NewGuid();
         var concluded = new ContentConcludedDto
         {
             ModelName = data.ValidatedSendMessageData.SelectedModel.ModelIdentifierName,
@@ -79,10 +80,11 @@ public class StreamResponseMessagePipelineStep(
             InputTokens = (int)conclusion.InputTokens,
             OutputTokens = (int)conclusion.OutputTokens,
             StopReason = conclusion.StreamUsage?.StopReason ?? "unknown",
-            MessageId = conclusion.InitialNewMessageData.Message.Id.ToString(),
+            MessageId = messageIdentifier.ToString(),
         };
         
-        await streamWriterService.WriteConclusion(concluded);
+        await streamWriterService.WriteConclusion(data.Conversation.Id, concluded);
+        data.NextMessageIdentifier = messageIdentifier;
         data.ResponseMessageContent = conclusion.Content;
         data.StreamUsage = conclusion.StreamUsage;
         return data;

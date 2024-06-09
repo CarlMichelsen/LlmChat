@@ -13,11 +13,23 @@ public class StreamWriterService(
     private HttpContext Context => httpContextAccessor.HttpContext
         ?? throw new Exception("Failed to get HttpContext in StreamWriterService");
 
-    public Task WriteConclusion(ContentConcludedDto contentConcludedDto)
+    public Task WriteSummary(ConversationEntityId conversationId, string summary)
     {
         var content = new ContentDeltaDto(
             UserMessageId: default,
-            ConversationId: default,
+            ConversationId: conversationId.Value.ToString(),
+            Content: default,
+            Concluded: default,
+            Summary: summary,
+            Error: default);
+        return this.WriteContentDelta(content);
+    }
+
+    public Task WriteConclusion(ConversationEntityId conversationId, ContentConcludedDto contentConcludedDto)
+    {
+        var content = new ContentDeltaDto(
+            UserMessageId: default,
+            ConversationId: conversationId.Value.ToString(),
             Content: default,
             Concluded: contentConcludedDto,
             Summary: default,
@@ -25,7 +37,7 @@ public class StreamWriterService(
         return this.WriteContentDelta(content);
     }
 
-    public async Task WriteIds(ConversationEntityId? conversationEntityId, MessageEntityId? messageEntityId)
+    public async Task WriteIds(ConversationEntityId conversationEntityId, MessageEntityId? messageEntityId)
     {
         var content = new ContentDeltaDto(
             UserMessageId: messageEntityId?.Value.ToString(),
@@ -44,7 +56,9 @@ public class StreamWriterService(
         string fullError;
         if (potentialSafeUserException is SafeUserFeedbackException safe)
         {
-            fullError = $"{error} -> {safe.Details}";
+            var detailsStringList = string.Join(", ", safe.Details);
+            var message = safe.Message + (safe.Details.Count > 0 ? $"\n{detailsStringList}" : string.Empty);
+            fullError = $"{error} -> {message}";
         }
         else
         {
@@ -65,6 +79,6 @@ public class StreamWriterService(
     public async Task WriteContentDelta(ContentDeltaDto contentDeltaDto)
     {
         await this.Context.Response.WriteAsync(JsonSerializer.Serialize(contentDeltaDto), CancellationToken.None);
-        await this.Context.Response.WriteAsync(string.Empty, CancellationToken.None);
+        await this.Context.Response.WriteAsync("\n", CancellationToken.None);
     }
 }

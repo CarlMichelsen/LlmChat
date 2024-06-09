@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace App.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20240531181146_InitialCreate")]
+    [Migration("20240609133023_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,11 +28,8 @@ namespace App.Migrations
 
             modelBuilder.Entity("Domain.Entity.ContentEntity", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -41,23 +38,20 @@ namespace App.Migrations
                     b.Property<int>("ContentType")
                         .HasColumnType("integer");
 
-                    b.Property<long?>("MessageEntityId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("MessageEntityId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MessageEntityId");
 
-                    b.ToTable("ContentEntity", "LlmChat");
+                    b.ToTable("Content", "LlmChat");
                 });
 
             modelBuilder.Entity("Domain.Entity.ConversationEntity", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
@@ -78,23 +72,23 @@ namespace App.Migrations
 
             modelBuilder.Entity("Domain.Entity.MessageEntity", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CompletedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long?>("ConversationEntityId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("ConversationEntityId")
+                        .HasColumnType("uuid");
 
-                    b.Property<long?>("PreviousMessageId")
-                        .HasColumnType("bigint");
+                    b.Property<bool>("IsUserMessage")
+                        .HasColumnType("boolean");
 
-                    b.Property<long?>("PromptId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("PreviousMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PromptId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -109,11 +103,8 @@ namespace App.Migrations
 
             modelBuilder.Entity("Domain.Entity.PromptEntity", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<long>("CurrentMillionInputTokenPrice")
                         .HasColumnType("bigint");

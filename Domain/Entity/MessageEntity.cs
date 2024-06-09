@@ -6,6 +6,8 @@ public class MessageEntity
 {
     public required MessageEntityId Id { get; init; }
 
+    public required bool IsUserMessage { get; init; }
+
     public required List<ContentEntity> Content { get; init; }
 
     public required PromptEntity? Prompt { get; set; }

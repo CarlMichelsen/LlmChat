@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -20,8 +19,7 @@ namespace App.Migrations
                 schema: "LlmChat",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Summary = table.Column<string>(type: "text", nullable: true),
                     CreatorIdentifier = table.Column<Guid>(type: "uuid", nullable: false),
                     LastAppendedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -37,8 +35,7 @@ namespace App.Migrations
                 schema: "LlmChat",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ModelName = table.Column<string>(type: "text", nullable: false),
                     ModelId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProviderPromptIdentifier = table.Column<string>(type: "text", nullable: false),
@@ -59,12 +56,12 @@ namespace App.Migrations
                 schema: "LlmChat",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PromptId = table.Column<long>(type: "bigint", nullable: true),
-                    PreviousMessageId = table.Column<long>(type: "bigint", nullable: true),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsUserMessage = table.Column<bool>(type: "boolean", nullable: false),
+                    PromptId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PreviousMessageId = table.Column<Guid>(type: "uuid", nullable: true),
                     CompletedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ConversationEntityId = table.Column<long>(type: "bigint", nullable: true),
+                    ConversationEntityId = table.Column<Guid>(type: "uuid", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -90,21 +87,20 @@ namespace App.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ContentEntity",
+                name: "Content",
                 schema: "LlmChat",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ContentType = table.Column<int>(type: "integer", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    MessageEntityId = table.Column<long>(type: "bigint", nullable: true),
+                    MessageEntityId = table.Column<Guid>(type: "uuid", nullable: true),
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ContentEntity", x => x.Id);
+                    table.PrimaryKey("PK_Content", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ContentEntity_Messages_MessageEntityId",
+                        name: "FK_Content_Messages_MessageEntityId",
                         column: x => x.MessageEntityId,
                         principalSchema: "LlmChat",
                         principalTable: "Messages",
@@ -112,9 +108,9 @@ namespace App.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ContentEntity_MessageEntityId",
+                name: "IX_Content_MessageEntityId",
                 schema: "LlmChat",
-                table: "ContentEntity",
+                table: "Content",
                 column: "MessageEntityId");
 
             migrationBuilder.CreateIndex(
@@ -140,7 +136,7 @@ namespace App.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ContentEntity",
+                name: "Content",
                 schema: "LlmChat");
 
             migrationBuilder.DropTable(

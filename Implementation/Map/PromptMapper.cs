@@ -20,15 +20,13 @@ public static class PromptMapper
                 while (prevMsg is not null)
                 {
                     var prevPromptMsg = new LlmPromptMessageDto(
-                        IsUserMessage: prevMsg.Prompt is null,
+                        IsUserMessage: prevMsg.IsUserMessage,
                         Content: prevMsg.Content.Select(x => new LlmTextContent { Text = x.Content }).ToList<LlmContent>());
                     
                     list.Insert(0, prevPromptMsg);
                     if (prevMsg.PreviousMessage?.Id is not null)
                     {
-                        prevMsg = conv.Messages
-                            .Where(m => m.PreviousMessage is not null)
-                            .FirstOrDefault(m => m.Id == prevMsg.PreviousMessage!.Id);
+                        prevMsg = conv.Messages.FirstOrDefault(m => m.Id == prevMsg.PreviousMessage!.Id);
                         continue;
                     }
 
@@ -43,7 +41,7 @@ public static class PromptMapper
 
             return new LlmPromptDto(
                 ModelIdentifier: validatedSendMessageData.SelectedModel.Id,
-                SystemMessage: "Respond very concisely. Assume that the user is a C# systems development expert and is using modern .net8 C#",
+                SystemMessage: "Respond very concisely. Assume that the user is a C# systems developmer and is using modern .net8 C#",
                 Messages: list);
         }
         catch (Exception e)

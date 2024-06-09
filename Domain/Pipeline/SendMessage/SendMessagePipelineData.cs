@@ -20,4 +20,6 @@ public class SendMessagePipelineData
     public StreamUsage? StreamUsage { get; set; }
 
     public MessageEntity? ResponseMessage { get; set; }
+
+    public Guid NextMessageIdentifier { get; set; }
 }

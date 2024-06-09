@@ -32,6 +32,7 @@ public class SummaryGenerationStep(
         }
 
         data.Conversation.Summary = summaryResult.Unwrap();
+        await streamWriterService.WriteSummary(data.Conversation.Id, data.Conversation.Summary);
         await context.SaveChangesAsync();
 
         return data;
