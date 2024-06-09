@@ -30,10 +30,7 @@ public class GetOrCreateConversationPipelineStep(
             return await streamWriterService.WriteError("Failed to get or create conversation", conversationResult.Error!);
         }
 
-        var conversation = conversationResult.Unwrap();
-        await streamWriterService.WriteIds(conversation.Id, default);
-
-        data.Conversation = conversation;
+        data.Conversation = conversationResult.Unwrap();
         return data;
     }
 }

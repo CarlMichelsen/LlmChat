@@ -8,6 +8,7 @@ using Interface.Service;
 namespace Implementation.Pipeline.Steps;
 
 public class AppendUserMessagePipelineStep(
+    IConversationDtoCacheService conversationDtoCacheService,
     IStreamWriterService streamWriterService,
     IMessageInitiationRepository messageInitiationRepository) : ITransactionPipelineStep<ApplicationContext, SendMessagePipelineData>
 {
@@ -37,6 +38,7 @@ public class AppendUserMessagePipelineStep(
         }
 
         var message = messageResult.Unwrap();
+        await conversationDtoCacheService.CacheConversation(data.Conversation);
         await streamWriterService.WriteIds(data.Conversation.Id, message.Id);
         data.UserMessage = message;
         return data;

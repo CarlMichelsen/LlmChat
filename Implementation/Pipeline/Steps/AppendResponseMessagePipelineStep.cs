@@ -10,6 +10,7 @@ using Interface.Service;
 namespace Implementation.Pipeline.Steps;
 
 public class AppendResponseMessagePipelineStep(
+    IConversationDtoCacheService conversationDtoCacheService,
     IStreamWriterService streamWriterService,
     IMessageInitiationRepository messageInitiationRepository) : ITransactionPipelineStep<ApplicationContext, SendMessagePipelineData>
 {
@@ -56,6 +57,7 @@ public class AppendResponseMessagePipelineStep(
         }
 
         data.ResponseMessage = responseInitiationResult.Unwrap();
+        await conversationDtoCacheService.InvalidateConversationCache(data.Conversation.Id);
         return data;
     }
 }
