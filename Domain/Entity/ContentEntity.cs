@@ -1,8 +1,10 @@
-﻿namespace Domain.Entity;
+﻿using Domain.Entity.Id;
+
+namespace Domain.Entity;
 
 public class ContentEntity
 {
-    public long Id { get; set; }
+    public required ContentEntityId Id { get; init; }
 
     public required MessageContentType ContentType { get; init; }
     

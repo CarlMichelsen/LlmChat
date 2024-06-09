@@ -19,14 +19,14 @@ public class LargeLanguageModelClientParseService(
     private string? lastKnownModelName = default;
 
     public async IAsyncEnumerable<ContentDeltaDto> Parse(
-        NewMessageData initiatedMessage,
+        NewMessageData newMessageData,
         IAsyncEnumerable<LlmStreamEvent> streamEvents,
         Func<ConcludedMessage, LlmModelDto, Task> handleConcludeMessage)
     {
         if (!this.ready)
         {
             yield return new ContentDeltaDto(
-                ConversationId: initiatedMessage.Conversation.Id.ToString(),
+                ConversationId: newMessageData.Conversation.Id.ToString(),
                 UserMessageId: default,
                 Content: default,
                 Concluded: default,
@@ -48,32 +48,32 @@ public class LargeLanguageModelClientParseService(
             {
                 case LlmStreamMessageStart messageStart:
                     yield return this.MessageStart(
-                        initiatedMessage,
+                        newMessageData,
                         messageStart);
                     continue;
                 
                 case LlmStreamContentDelta contentDelta:
                     yield return this.ContentDelta(
-                        initiatedMessage,
+                        newMessageData,
                         contentDelta);
                     continue;
                 
                 case LlmStreamTotalUsage totalUsage:
                     this.TotalUsage(
-                        initiatedMessage,
+                        newMessageData,
                         totalUsage);
                     continue;
                 
                 case LlmStreamError error:
                     yield return this.Error(
-                        initiatedMessage,
+                        newMessageData,
                         error);
                     continue;
             }
         }
 
         await this.Conclude(
-            initiatedMessage,
+            newMessageData,
             handleConcludeMessage);
         
         this.ready = true;
@@ -92,7 +92,7 @@ public class LargeLanguageModelClientParseService(
     }
 
     private async Task Conclude(
-        NewMessageData initiatedMessage,
+        NewMessageData newMessageData,
         Func<ConcludedMessage, LlmModelDto, Task> handleConcludeMessage)
     {
         StreamUsage? streamUsage = default;
@@ -109,7 +109,7 @@ public class LargeLanguageModelClientParseService(
 
         var conclude = new ConcludedMessage
         {
-            ConversationId = initiatedMessage.Conversation.Id,
+            ConversationId = newMessageData.Conversation.Id,
             ProviderPromptIdentifier = this.lastKnownPromptIdentifier!,
             ModelIdentifierName = this.lastKnownModelName ?? model.ModelIdentifierName ?? string.Empty,
             InputTokens = this.lastKnownTotalUsage!.InputTokens,
@@ -121,7 +121,7 @@ public class LargeLanguageModelClientParseService(
                 .OrderBy(x => x.Index)
                 .Select(kv => new MessageContentDto { ContentType = kv.ContentType, Content = kv.Content })
                 .ToList(),
-            NewMessageData = initiatedMessage,
+            InitialNewMessageData = newMessageData,
             StreamUsage = streamUsage,
         };
 
@@ -129,7 +129,7 @@ public class LargeLanguageModelClientParseService(
     }
 
     private ContentDeltaDto MessageStart(
-        NewMessageData initiatedMessage,
+        NewMessageData newMessageData,
         LlmStreamMessageStart messageStart)
     {
         var contentString = messageStart.Message.Message.Content.FirstOrDefault()?.GetContent();
@@ -142,7 +142,7 @@ public class LargeLanguageModelClientParseService(
         this.AppendContent(content);
 
         var contentDeltaDto = new ContentDeltaDto(
-            ConversationId: initiatedMessage.Conversation.Id.ToString(),
+            ConversationId: newMessageData.Conversation.Id.ToString(),
             UserMessageId: default,
             Content: content,
             Concluded: default,
@@ -156,7 +156,7 @@ public class LargeLanguageModelClientParseService(
     }
 
     private ContentDeltaDto ContentDelta(
-        NewMessageData initiatedMessage,
+        NewMessageData newMessageData,
         LlmStreamContentDelta contentDelta)
     {
         var content = new StreamContentDto
@@ -168,7 +168,7 @@ public class LargeLanguageModelClientParseService(
         this.AppendContent(content);
 
         var contentDeltaDto = new ContentDeltaDto(
-            ConversationId: initiatedMessage.Conversation.Id.ToString(),
+            ConversationId: newMessageData.Conversation.Id.ToString(),
             UserMessageId: default,
             Content: content,
             Concluded: default,
@@ -179,18 +179,18 @@ public class LargeLanguageModelClientParseService(
     }
 
     private void TotalUsage(
-        NewMessageData initiatedMessage,
+        NewMessageData newMessageData,
         LlmStreamTotalUsage totalUsage)
     {
         this.lastKnownTotalUsage = totalUsage;
     }
 
     private ContentDeltaDto Error(
-        NewMessageData initiatedMessage,
+        NewMessageData newMessageData,
         LlmStreamError error)
     {
         var contentDeltaDto = new ContentDeltaDto(
-            ConversationId: initiatedMessage.Conversation.Id.ToString(),
+            ConversationId: newMessageData.Conversation.Id.ToString(),
             UserMessageId: default,
             Content: default,
             Concluded: default,

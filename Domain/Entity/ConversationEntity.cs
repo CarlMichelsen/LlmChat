@@ -1,8 +1,10 @@
-﻿namespace Domain.Entity;
+﻿using Domain.Entity.Id;
+
+namespace Domain.Entity;
 
 public class ConversationEntity
 {
-    public long Id { get; set; }
+    public required ConversationEntityId Id { get; init; }
 
     public string? Summary { get; set; }
 

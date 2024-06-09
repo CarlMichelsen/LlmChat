@@ -1,5 +1,6 @@
 ﻿using Domain.Abstraction;
 using Domain.Entity;
+using Domain.Entity.Id;
 using Domain.Exception;
 using Implementation.Database;
 using Interface.Repository;
@@ -10,7 +11,7 @@ namespace Implementation.Repository;
 public class ConversationReadRepository(
     ApplicationContext applicationContext) : IConversationReadRepository
 {
-    public async Task<Result<ConversationEntity>> GetRichConversation(Guid creatorIdentifier, long conversationId)
+    public async Task<Result<ConversationEntity>> GetRichConversation(Guid creatorIdentifier, ConversationEntityId conversationId)
     {
         try
         {

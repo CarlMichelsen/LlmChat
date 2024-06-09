@@ -1,6 +1,6 @@
 ﻿using Domain.Abstraction;
-using Domain.Dto.Chat;
 using Domain.Entity;
+using Domain.Pipeline.SendMessage;
 using LargeLanguageModelClient.Dto.Prompt;
 using LargeLanguageModelClient.Dto.Prompt.Content;
 
@@ -8,15 +8,15 @@ namespace Implementation.Map;
 
 public static class PromptMapper
 {
-    public static Result<LlmPromptDto> ToPrompt(ConversationEntity conv, NewMessageDto newUserMessageDto)
+    public static Result<LlmPromptDto> ToPrompt(ConversationEntity conv, ValidatedSendMessageData validatedSendMessageData)
     {
         try
         {
             List<LlmPromptMessageDto> list = [];
 
-            if (!string.IsNullOrWhiteSpace(newUserMessageDto.ResponseToMessageId) && long.TryParse(newUserMessageDto.ResponseToMessageId, out var responseToId))
+            if (validatedSendMessageData.ResponseToMessageId is not null)
             {
-                var prevMsg = conv.Messages.FirstOrDefault(m => m.Id == responseToId);
+                var prevMsg = conv.Messages.FirstOrDefault(m => m.Id == validatedSendMessageData.ResponseToMessageId);
                 while (prevMsg is not null)
                 {
                     var prevPromptMsg = new LlmPromptMessageDto(
@@ -26,7 +26,9 @@ public static class PromptMapper
                     list.Insert(0, prevPromptMsg);
                     if (prevMsg.PreviousMessage?.Id is not null)
                     {
-                        prevMsg = conv.Messages.FirstOrDefault(m => m.Id == prevMsg.PreviousMessage?.Id);
+                        prevMsg = conv.Messages
+                            .Where(m => m.PreviousMessage is not null)
+                            .FirstOrDefault(m => m.Id == prevMsg.PreviousMessage!.Id);
                         continue;
                     }
 
@@ -36,11 +38,11 @@ public static class PromptMapper
             
             var newMessage = new LlmPromptMessageDto(
                 IsUserMessage: true,
-                Content: newUserMessageDto.Content.Select(x => new LlmTextContent { Text = x.Content }).ToList<LlmContent>());
+                Content: validatedSendMessageData.Content.Select(x => new LlmTextContent { Text = x.Content }).ToList<LlmContent>());
             list.Add(newMessage);
 
             return new LlmPromptDto(
-                ModelIdentifier: newUserMessageDto.ModelIdentifier,
+                ModelIdentifier: validatedSendMessageData.SelectedModel.Id,
                 SystemMessage: "Respond very concisely. Assume that the user is a C# systems development expert and is using modern .net8 C#",
                 Messages: list);
         }

@@ -1,6 +1,7 @@
 ﻿using Domain.Abstraction;
 using Domain.Dto.Conversation;
 using Domain.Entity;
+using Domain.Entity.Id;
 using Domain.Exception;
 using Implementation.Map;
 using Interface.Repository;
@@ -14,7 +15,7 @@ public class ConversationDtoService(
     ISessionService sessionService,
     IConversationReadRepository conversationReadRepository) : IConversationDtoService
 {
-    public Task<Result<ConversationDto>> GetConversationDto(long conversationId)
+    public Task<Result<ConversationDto>> GetConversationDto(ConversationEntityId conversationId)
     {
         // TODO: implement caching with invalidation
         return this.GetConversationDtoDirect(conversationId);
@@ -111,7 +112,7 @@ public class ConversationDtoService(
         }
     }
 
-    private async Task<Result<ConversationDto>> GetConversationDtoDirect(long conversationId)
+    private async Task<Result<ConversationDto>> GetConversationDtoDirect(ConversationEntityId conversationId)
     {
         var creatorIdentifier = sessionService.UserProfileId;
         var conversationResult = await conversationReadRepository

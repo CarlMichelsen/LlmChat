@@ -5,7 +5,7 @@ namespace Domain.Dto.Conversation;
 public class ConversationOptionDto
 {
     [JsonPropertyName("id")]
-    public required long Id { get; init; }
+    public required string Id { get; init; }
 
     [JsonPropertyName("summary")]
     public required string? Summary { get; init; }

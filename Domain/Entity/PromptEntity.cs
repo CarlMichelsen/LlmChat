@@ -1,8 +1,10 @@
-﻿namespace Domain.Entity;
+﻿using Domain.Entity.Id;
+
+namespace Domain.Entity;
 
 public class PromptEntity
 {
-    public long Id { get; set; }
+    public required PromptEntityId Id { get; init; }
 
     public required string ModelName { get; init; }
 

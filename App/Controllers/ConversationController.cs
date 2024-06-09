@@ -1,6 +1,7 @@
 ﻿using Domain.Configuration;
 using Domain.Dto;
 using Domain.Dto.Conversation;
+using Domain.Entity.Id;
 using Interface.Handler;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,10 @@ namespace App.Controllers;
 public class ConversationController(
     IConversationHandler conversationHandler) : ControllerBase
 {
-    [HttpGet("{conversationId:long}")]
-    public async Task<ActionResult<ServiceResponse<ConversationDto>>> GetConversation(long conversationId)
+    [HttpGet("{conversationId}")]
+    public async Task<ActionResult<ServiceResponse<ConversationDto>>> GetConversation(Guid conversationId)
     {
-        var serviceResponse = await conversationHandler.GetConversation(conversationId);
+        var serviceResponse = await conversationHandler.GetConversation(new ConversationEntityId(conversationId));
         return this.Ok(serviceResponse);
     }
 

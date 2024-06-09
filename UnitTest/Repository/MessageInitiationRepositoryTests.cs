@@ -1,8 +1,6 @@
-﻿using Domain.Conversation;
-using Domain.Dto.Chat;
-using Domain.Dto.Chat.Stream;
-using Domain.Dto.Conversation;
-using Domain.Entity;
+﻿using Domain.Entity;
+using Domain.Entity.Id;
+using Domain.Pipeline.SendMessage;
 using Implementation.Repository;
 using LargeLanguageModelClient.Dto.Model;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +10,9 @@ namespace UnitTest.Repository;
 
 public class MessageInitiationRepositoryTests : TestDatabase
 {
-    private const string SeededConversationId = "1";
-    private const string SeededInitialMessageId = "1";
-    private const string SeededSecondMessageId = "2";
+    private static ConversationEntityId seededConversationId = new ConversationEntityId(Guid.NewGuid());
+    private static MessageEntityId seededInitialMessageId = new MessageEntityId(Guid.NewGuid());
+    private static MessageEntityId seededSecondMessageId = new MessageEntityId(Guid.NewGuid());
 
     private readonly LlmModelDto mockModel = new(
         Guid.NewGuid(),
@@ -44,32 +42,34 @@ public class MessageInitiationRepositoryTests : TestDatabase
     {
         // Arrange
         await this.ExecuteDatabaseSeed();
-        var content = new MessageContentDto
+        var content = new ContentEntity
         {
-            ContentType = "Text",
+            Id = new ContentEntityId(Guid.NewGuid()),
+            ContentType = MessageContentType.Text,
             Content = "Tell me a story!",
         };
 
-        var newUserMessageDto = new NewMessageDto(
-            ConversationId: SeededConversationId,
-            ResponseToMessageId: SeededSecondMessageId,
-            Content: [content],
-            ModelIdentifier: Guid.Parse("2370891f-9593-4ba6-be41-56e47fa6083f"));
+        var validatedSendMessageData = new ValidatedSendMessageData
+        {
+            RequestConversationId = seededConversationId,
+            ResponseToMessageId = seededSecondMessageId,
+            Content = [content],
+            SelectedModel = this.mockModel,
+        };
 
         // Act
         var foundConversation = await this.Context.Conversations
-            .Where(c => c.Id.ToString() == SeededConversationId)
+            .Where(c => c.Id == seededConversationId)
             .Include(c => c.Messages)
             .FirstAsync(CancellationToken.None);
         var result = await this.sut.InitiateMessage(
-            newUserMessageDto,
-            this.mockModel,
+            validatedSendMessageData,
             foundConversation,
             default);
         await this.Context.SaveChangesAsync();
 
         // Assert
-        Assert.IsType<NewMessageData>(result.Unwrap());
+        Assert.IsType<MessageEntity>(result.Unwrap());
         Assert.True(result.IsSuccess);
         Assert.IsNotType<Exception>(result.Error);
         Assert.Null(result.Error);
@@ -86,8 +86,16 @@ public class MessageInitiationRepositoryTests : TestDatabase
     {
         var m1 = new MessageEntity
         {
-            Id = long.Parse(SeededInitialMessageId),
-            Content = [new ContentEntity { ContentType = MessageContentType.Text, Content = "Hello" }],
+            Id = seededInitialMessageId,
+            Content =
+            [
+                new ContentEntity
+                {
+                    Id = new ContentEntityId(Guid.NewGuid()),
+                    ContentType = MessageContentType.Text,
+                    Content = "Hello",
+                },
+            ],
             Prompt = default,
             PreviousMessage = default,
             CompletedUtc = DateTime.UtcNow,
@@ -95,8 +103,16 @@ public class MessageInitiationRepositoryTests : TestDatabase
 
         var m2 = new MessageEntity
         {
-            Id = long.Parse(SeededSecondMessageId),
-            Content = [new ContentEntity { ContentType = MessageContentType.Text, Content = "Hi! how can i help you?" }],
+            Id = seededSecondMessageId,
+            Content =
+            [
+                new ContentEntity
+                {
+                    Id = new ContentEntityId(Guid.NewGuid()),
+                    ContentType = MessageContentType.Text,
+                    Content = "Hi! how can i help you?",
+                },
+            ],
             Prompt = default,
             PreviousMessage = default,
             CompletedUtc = DateTime.UtcNow,
@@ -104,7 +120,7 @@ public class MessageInitiationRepositoryTests : TestDatabase
 
         var conv = new ConversationEntity
         {
-            Id = long.Parse(SeededConversationId),
+            Id = seededConversationId,
             CreatorIdentifier = this.creatorIdentifier,
             Messages =
             [m1, m2],
