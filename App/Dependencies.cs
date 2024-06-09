@@ -49,6 +49,7 @@ public static class Dependencies
             .AddScoped<IStreamWriterService, StreamWriterService>()
             .AddScoped<ISummaryService, SummaryService>()
             .AddScoped<IConversationDtoService, ConversationDtoService>()
+            .AddScoped<IConversationDtoCacheService, ConversationDtoCacheService>()
             .AddScoped<IConversationOptionService, ConversationOptionService>();
         
         // Repository

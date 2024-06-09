@@ -57,6 +57,7 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
             () => {
                 setText("");
                 setReady(true);
+                store.dispatch(cancelEdit(selectedConversationId!));
             },
             () => setReady(true));
     }

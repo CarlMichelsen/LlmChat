@@ -22,6 +22,7 @@ public abstract class BaseTransactionPipeline<T, TR> : ITransactionPipeline<T, T
         using var transaction = this.Context.Database.BeginTransaction();
         try
         {
+            await this.PrePipelineExecution(data);
             var step = this.Steps.First();
 
             do
@@ -54,5 +55,19 @@ public abstract class BaseTransactionPipeline<T, TR> : ITransactionPipeline<T, T
             transaction.Rollback();
             return e;
         }
+        finally
+        {
+            await this.PostPipelineExecution(data);
+        }
+    }
+
+    protected virtual Task PrePipelineExecution(TR data)
+    {
+        return Task.CompletedTask;
+    }
+
+    protected virtual Task PostPipelineExecution(TR data)
+    {
+        return Task.CompletedTask;
     }
 }
