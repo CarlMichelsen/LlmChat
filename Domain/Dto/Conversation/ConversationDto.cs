@@ -10,6 +10,9 @@ public class ConversationDto
     [JsonPropertyName("summary")]
     public required string? Summary { get; init; }
 
+    [JsonPropertyName("systemMessage")]
+    public required string SystemMessage { get; init; }
+
     [JsonPropertyName("dialogSlices")]
     public required List<DialogSliceDto> DialogSlices { get; init; }
 

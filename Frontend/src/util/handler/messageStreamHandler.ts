@@ -4,7 +4,7 @@ import { appendMessage, selectMessage } from "../../store/conversationSlice";
 import { AppendMessagePayload } from "../../store/conversationSlice/appendMessage";
 import { setInputReady } from "../../store/inputSlice";
 import { appendStream, clearStream } from "../../store/messageStreamSlice";
-import { ConversationOption } from "../client/conversationOption";
+import { ConversationOption } from "../type/conversationOption";
 import { sendMessage } from "../client/sendMessage";
 import { scrollStickToBottom } from "../helpers/scrollStickToBottom";
 import { Concluded } from "../type/llmChat/concluded";

@@ -41,7 +41,7 @@ public class MessageInitiationRepositoryTests : TestDatabase
             .Where(c => c.Id == ConversationMockDataGenerator.SeededConversationId)
             .Include(c => c.Messages)
             .FirstAsync(CancellationToken.None);
-        var result = await this.sut.InitiateMessage(
+        var result = this.sut.InitiateMessage(
             validatedSendMessageData,
             foundConversation,
             default,

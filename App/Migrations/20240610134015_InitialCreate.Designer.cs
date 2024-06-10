@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace App.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20240609133023_InitialCreate")]
+    [Migration("20240610134015_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -56,7 +56,7 @@ namespace App.Migrations
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("CreatorIdentifier")
+                    b.Property<Guid>("CreatorId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastAppendedUtc")
@@ -65,7 +65,13 @@ namespace App.Migrations
                     b.Property<string>("Summary")
                         .HasColumnType("text");
 
+                    b.Property<string>("SystemMessage")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
 
                     b.ToTable("Conversations", "LlmChat");
                 });
@@ -99,6 +105,23 @@ namespace App.Migrations
                     b.HasIndex("PromptId");
 
                     b.ToTable("Messages", "LlmChat");
+                });
+
+            modelBuilder.Entity("Domain.Entity.ProfileEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DefaultSystemMessage")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SelectedModel")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Profiles", "LlmChat");
                 });
 
             modelBuilder.Entity("Domain.Entity.PromptEntity", b =>
@@ -147,6 +170,17 @@ namespace App.Migrations
                     b.HasOne("Domain.Entity.MessageEntity", null)
                         .WithMany("Content")
                         .HasForeignKey("MessageEntityId");
+                });
+
+            modelBuilder.Entity("Domain.Entity.ConversationEntity", b =>
+                {
+                    b.HasOne("Domain.Entity.ProfileEntity", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("Domain.Entity.MessageEntity", b =>

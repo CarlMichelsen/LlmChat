@@ -12,7 +12,7 @@ namespace Implementation.Repository;
 public class MessageInitiationRepository(
     ApplicationContext applicationContext) : IMessageInitiationRepository
 {
-    public async Task<Result<MessageEntity>> InitiateMessage(
+    public Result<MessageEntity> InitiateMessage(
         ValidatedSendMessageData validatedSendMessageData,
         ConversationEntity conversationEntity,
         MessageEntityId? messageEntityId,
@@ -67,7 +67,7 @@ public class MessageInitiationRepository(
         conversationEntity.Messages.Add(newMessage);
         conversationEntity.LastAppendedUtc = DateTime.UtcNow;
 
-        await applicationContext.SaveChangesAsync();
+        applicationContext.SaveChanges();
         return newMessage;
     }
 }

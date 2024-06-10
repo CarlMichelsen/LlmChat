@@ -77,7 +77,8 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
                 editingMessage={input?.editing}
                 cancelEdit={handleCancelEdit}
                 streaming={messageStream?.streaming === true}
-                sendMessage={sendActualMessage} />
+                sendMessage={sendActualMessage}
+                placeholder="Send message here"/>
         </div>
     );
 }

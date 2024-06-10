@@ -1,14 +1,12 @@
 ﻿using App.Extensions;
 using App.Security;
 using Domain.Configuration;
-using Domain.Pipeline.SendMessage;
 using Implementation.Database;
 using Implementation.Handler;
 using Implementation.Pipeline;
 using Implementation.Repository;
 using Implementation.Service;
 using Interface.Handler;
-using Interface.Pipeline;
 using Interface.Repository;
 using Interface.Service;
 using LargeLanguageModelClient;
@@ -25,6 +23,7 @@ public static class Dependencies
         // Configuration
         builder.Configuration.AddJsonFile("secrets.json", optional: false, reloadOnChange: true);
         builder.Services
+            .Configure<ProfileDefaultOptions>(builder.Configuration.GetSection(ProfileDefaultOptions.SectionName))
             .Configure<LargeLanguageModelOptions>(builder.Configuration.GetSection(LargeLanguageModelOptions.SectionName))
             .Configure<ConversationOptions>(builder.Configuration.GetSection(ConversationOptions.SectionName))
             .Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
@@ -32,6 +31,7 @@ public static class Dependencies
         // Handler
         builder.Services
             .AddScoped<ISessionHandler, SessionHandler>()
+            .AddScoped<IProfileHandler, ProfileHandler>()
             .AddScoped<IModelHandler, ModelHandler>()
             .AddScoped<IMessageHandler, MessageHandler>()
             .AddScoped<IConversationHandler, ConversationHandler>();
@@ -39,7 +39,7 @@ public static class Dependencies
         // Pipeline
         builder.Services
             .RegisterPipelineSteps()
-            .AddTransient<ITransactionPipeline<ApplicationContext, SendMessagePipelineData>, SendMessagePipeline>();
+            .AddTransient<SendMessagePipeline>();
 
         // Service
         builder.Services
@@ -54,10 +54,10 @@ public static class Dependencies
         
         // Repository
         builder.Services
-            .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
+            .AddScoped<IProfileRepository, ProfileRepository>()
             .AddScoped<IMessageInitiationRepository, MessageInitiationRepository>()
-            .AddScoped<IConversationReadRepository, ConversationReadRepository>()
             .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
+            .AddScoped<IConversationSystemMessageRepository, ConversationSystemMessageRepository>()
             .AddScoped<IConversationReadRepository, ConversationReadRepository>();
         
         // Client
@@ -99,7 +99,7 @@ public static class Dependencies
                 ["application/javascript", "text/css", "text/html", "text/json", "text/plain", "application/json"]);
         });
 
-        // CORS
+        // Development CORS
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(

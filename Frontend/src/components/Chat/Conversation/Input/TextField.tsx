@@ -9,9 +9,10 @@ type TextFieldProps = {
     cancelEdit: () => void;
     streaming: boolean;
     sendMessage: () => void;
+    placeholder?: string;
 }
 
-const TextField: React.FC<TextFieldProps> = ({ ready, streaming, sendMessage, text, setText, editingMessage, cancelEdit }) => {
+const TextField: React.FC<TextFieldProps> = ({ ready, streaming, sendMessage, text, setText, editingMessage, cancelEdit, placeholder }) => {
     const handleSendOnEnter = (keyEvent: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (!keyEvent.shiftKey && keyEvent.key === "Enter") {
             keyEvent.preventDefault();
@@ -24,8 +25,9 @@ const TextField: React.FC<TextFieldProps> = ({ ready, streaming, sendMessage, te
 
     return (
         <div className="px-2 grid grid-cols-[1fr_50px]">
-            <label htmlFor="chatbox" className="sr-only">Send message here</label>
-            <textarea 
+            <label htmlFor="chatbox" className="sr-only">Type message here and press enter to send it</label>
+            <textarea
+                placeholder={placeholder}
                 className={
                     `block w-full h-32 mx-auto resize-none ${streaming && "bg-blue-400"} ${!ready && "border-none"} border border-black rounded-md disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none ${!editingMessage && "col-span-2"}`}
                 onKeyDown={handleSendOnEnter}

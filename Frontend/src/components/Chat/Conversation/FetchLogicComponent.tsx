@@ -5,6 +5,7 @@ import { setConversation } from "../../../store/conversationSlice";
 import { Conversation } from "../../../util/type/llmChat/conversation";
 import { getConversation } from "../../../util/client/conversation";
 import { useQuery, useQueryClient } from "react-query";
+import { scrollStickToBottom } from "../../../util/helpers/scrollStickToBottom";
 
 const FetchLogicComponent: React.FC = () => {
     const queryClient = useQueryClient();
@@ -33,6 +34,7 @@ const FetchLogicComponent: React.FC = () => {
     useEffect(() => {
         if (status === "success") {
             store.dispatch(setConversation(data));
+            setTimeout(() => scrollStickToBottom(true), 0);
         }
     }, [data, status]);
 

@@ -8,7 +8,7 @@ namespace Interface.Repository;
 
 public interface IMessageInitiationRepository
 {
-    Task<Result<MessageEntity>> InitiateMessage(
+    Result<MessageEntity> InitiateMessage(
         ValidatedSendMessageData newUserMessageDto,
         ConversationEntity conversationEntity,
         MessageEntityId? messageEntityId,

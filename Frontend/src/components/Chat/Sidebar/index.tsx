@@ -3,7 +3,7 @@ import store, { RootApplicationState } from "../../../store";
 import { logoutRequest } from "../../../util/client/loginClient";
 import { logout } from "../../../store/userSlice";
 import Conversations from "./Conversations";
-import { ConversationOption } from "../../../util/client/conversationOption";
+import { ConversationOption } from "../../../util/type/conversationOption";
 import { getConversationOptions } from "../../../util/client/conversation";
 import { useQuery } from "react-query";
 import { useEffect } from "react";
@@ -24,9 +24,8 @@ const Sidebar: React.FC = () => {
 
     const { data, status } = useQuery<ConversationOption[], Error>(
         'conversationList',
-        fetchConversationOptions, {
-        staleTime: Infinity
-    });
+        fetchConversationOptions,
+        { staleTime: Infinity });
 
     useEffect(() => {
         if (status === "success") {

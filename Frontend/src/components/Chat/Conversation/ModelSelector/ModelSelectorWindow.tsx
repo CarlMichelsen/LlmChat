@@ -42,11 +42,11 @@ const ModelSelectorWindow: React.FC = () => {
     return (
         <ol>
             {providers.map(p => (
-                <li>
+                <li key={p.providerName}>
                     <p>{p.providerName}</p>
                     <ol>
                         {p.models.map(m => (
-                            <li className="ml-2">
+                            <li className="ml-2" key={m.id}>
                                 <button className="hover:underline w-48 text-left px-2" onMouseDown={() => handleClick(m.id)}>{m.modelDisplayName}</button>
                             </li>
                         ))}

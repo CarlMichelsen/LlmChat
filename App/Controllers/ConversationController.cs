@@ -15,9 +15,17 @@ public class ConversationController(
     IConversationHandler conversationHandler) : ControllerBase
 {
     [HttpGet("{conversationId}")]
-    public async Task<ActionResult<ServiceResponse<ConversationDto>>> GetConversation(Guid conversationId)
+    public async Task<ActionResult<ServiceResponse<ConversationDto>>> GetConversation([FromRoute] Guid conversationId)
     {
         var serviceResponse = await conversationHandler.GetConversation(new ConversationEntityId(conversationId));
+        return this.Ok(serviceResponse);
+    }
+
+    [HttpPost("{conversationId}/system")]
+    public async Task<ActionResult<ServiceResponse<List<ConversationOptionDto>>>> SetSystemMessage([FromRoute] Guid conversationId, [FromBody] string systemMessage)
+    {
+        var serviceResponse = await conversationHandler
+            .SetConversationSystemMessage(new ConversationEntityId(conversationId), systemMessage);
         return this.Ok(serviceResponse);
     }
 

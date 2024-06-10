@@ -3,13 +3,15 @@ using Domain.Dto.Conversation;
 using Domain.Entity.Id;
 using Domain.Exception;
 using Interface.Handler;
+using Interface.Repository;
 using Interface.Service;
 
 namespace Implementation.Handler;
 
 public class ConversationHandler(
     IConversationDtoService conversationDtoService,
-    IConversationOptionService conversationOptionService) : IConversationHandler
+    IConversationOptionService conversationOptionService,
+    IConversationSystemMessageRepository conversationSystemMessageRepository) : IConversationHandler
 {
     public async Task<ServiceResponse<ConversationDto>> GetConversation(ConversationEntityId conversationId)
     {
@@ -37,6 +39,19 @@ public class ConversationHandler(
         }
 
         return new ServiceResponse<List<ConversationOptionDto>>(conversationOptionsResult.Unwrap());
+    }
+
+    public async Task<ServiceResponse<string>> SetConversationSystemMessage(ConversationEntityId conversationId, string newSystemMessage)
+    {
+        var setSystemMessageResult = await conversationSystemMessageRepository
+            .SetConversationSystemMessage(conversationId, newSystemMessage);
+        
+        if (setSystemMessageResult.IsError)
+        {
+            return ServiceResponse<string>.CreateErrorResponse("Failed to set system message");
+        }
+
+        return new ServiceResponse<string>(setSystemMessageResult.Unwrap());
     }
 
     private static string MapError(string initial, Exception e)

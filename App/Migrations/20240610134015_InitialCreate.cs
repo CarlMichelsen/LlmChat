@@ -15,19 +15,17 @@ namespace App.Migrations
                 name: "LlmChat");
 
             migrationBuilder.CreateTable(
-                name: "Conversations",
+                name: "Profiles",
                 schema: "LlmChat",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Summary = table.Column<string>(type: "text", nullable: true),
-                    CreatorIdentifier = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastAppendedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DefaultSystemMessage = table.Column<string>(type: "text", nullable: false),
+                    SelectedModel = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Conversations", x => x.Id);
+                    table.PrimaryKey("PK_Profiles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -49,6 +47,30 @@ namespace App.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Prompts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Conversations",
+                schema: "LlmChat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Summary = table.Column<string>(type: "text", nullable: true),
+                    SystemMessage = table.Column<string>(type: "text", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastAppendedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Conversations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Conversations_Profiles_CreatorId",
+                        column: x => x.CreatorId,
+                        principalSchema: "LlmChat",
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -114,6 +136,12 @@ namespace App.Migrations
                 column: "MessageEntityId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Conversations_CreatorId",
+                schema: "LlmChat",
+                table: "Conversations",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Messages_ConversationEntityId",
                 schema: "LlmChat",
                 table: "Messages",
@@ -149,6 +177,10 @@ namespace App.Migrations
 
             migrationBuilder.DropTable(
                 name: "Prompts",
+                schema: "LlmChat");
+
+            migrationBuilder.DropTable(
+                name: "Profiles",
                 schema: "LlmChat");
         }
     }
