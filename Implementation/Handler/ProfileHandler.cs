@@ -10,6 +10,21 @@ public class ProfileHandler(
     ISessionService sessionService,
     IProfileRepository profileRepository) : IProfileHandler
 {
+    public async Task<ServiceResponse<string>> GetDefaultSystemMessage()
+    {
+        var profileResult = await profileRepository
+            .GetAndOrCreateProfile(new ProfileEntityId(sessionService.UserProfileId));
+        
+        if (profileResult.IsError)
+        {
+            return ServiceResponse<string>.CreateErrorResponse(
+                "Failed to get default system message for user",
+                profileResult.Error!);
+        }
+
+        return new ServiceResponse<string>(profileResult.Unwrap().DefaultSystemMessage);
+    }
+
     public async Task<ServiceResponse<string>> SetDefaultSystemMessage(string systemMessage)
     {
         var newSystemMessageResult = await profileRepository.SetDefaultSystemMessage(

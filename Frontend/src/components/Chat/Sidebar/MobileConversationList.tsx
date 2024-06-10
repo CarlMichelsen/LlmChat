@@ -14,15 +14,21 @@ const MobileConversationList: React.FC<{ conversations?: ConversationOption[] }>
 
     return (
         <div id="mobile-conversation-list">
-            <button
-                className="p-1"
-                onMouseDown={() => store.dispatch(openMobileConversationList(!conversationListState.mobileIsOpen))}>
-                {conversationListState.mobileIsOpen ? "Close" : "Open"}
-            </button>
+            <div className="grid grid-cols-[60px_1fr]">
+                <button
+                    className="hover:underline p-1"
+                    onMouseDown={() => store.dispatch(openMobileConversationList(!conversationListState.mobileIsOpen))}>
+                    {conversationListState.mobileIsOpen ? "Close" : "Open"}
+                </button>
+
+                <button
+                    className="hover:underline"
+                    onMouseDown={() => store.dispatch(selectConversation(null))}>Create new conversation</button>
+            </div>
 
             {conversationListState.mobileIsOpen && (
-                <div className="absolute left-0 top-[50px] w-full z-10">
-                    <ol className="mx-2 px-6 bg-white max-h-72 overflow-y-scroll space-y-1">
+                <div className="absolute left-0 top-[50px] w-full z-20">
+                    <ol className="mx-2 px-6 bg-white max-h-72 overflow-y-scroll space-y-1 border-b border-l border-r border-black rounded-b-md">
                         {conversations?.map(s => (<ConversationOptionComponent key={s.id} option={s} selected={conversationListState.selectedConversationId == s.id} selectConversation={handleSelectConversation} />))}
                     </ol>
                 </div>

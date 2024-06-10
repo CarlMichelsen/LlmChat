@@ -10,16 +10,14 @@ const getFullDestinationFromPath = (path: string) => {
 
 export const serviceRequest = async <T>(method: "GET"|"POST"|"DELETE", path: string, body?: any): Promise<ServiceResponse<T>> => {
     try {
-        const isString = typeof(body) === "string";
         const fullDestination = getFullDestinationFromPath(path);
-        const response = await fetch(
-            fullDestination,
-        {
+        const init: RequestInit = {
             method: method,
             credentials: 'include',
-            body: isString ? body : JSON.stringify(body),
-            headers: isString ? {"Content-Type": "text/plain"} : { "Content-Type": "application/json" },
-        });
+            body: JSON.stringify(body),
+            headers: { "Content-Type": "application/json" },
+        };
+        const response = await fetch(fullDestination, init);
 
         // Check if the request was successful
         if (response.ok) {

@@ -1,6 +1,6 @@
 import { navigateToLoginPage } from "../../util/client/loginClient";
 
-const LogedOut: React.FC = () => {
+const LoggedOut: React.FC = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -27,4 +27,4 @@ const LogedOut: React.FC = () => {
     );
 }
 
-export default LogedOut;
+export default LoggedOut;

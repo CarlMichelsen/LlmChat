@@ -19,4 +19,13 @@ public class ProfileController(IProfileHandler profileHandler) : ControllerBase
         
         return this.Ok(defaultSystemMessageResponse);
     }
+
+    [HttpGet("system")]
+    public async Task<ActionResult<ServiceResponse<string>>> GetDefaultSystemMessage()
+    {
+        var defaultSystemMessageResponse = await profileHandler
+            .GetDefaultSystemMessage();
+        
+        return this.Ok(defaultSystemMessageResponse);
+    }
 }

@@ -24,9 +24,8 @@ const Sidebar: React.FC = () => {
 
     const { data, status } = useQuery<ConversationOption[], Error>(
         'conversationList',
-        fetchConversationOptions, {
-        staleTime: Infinity
-    });
+        fetchConversationOptions,
+        { staleTime: Infinity });
 
     useEffect(() => {
         if (status === "success") {

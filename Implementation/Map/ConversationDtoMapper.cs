@@ -19,6 +19,7 @@ public static class ConversationDtoMapper
         {
             Id = conversationEntity.Id.ToString(),
             Summary = conversationEntity.Summary,
+            SystemMessage = conversationEntity.SystemMessage,
             DialogSlices = dialogSliceResult.Unwrap(),
             LastUpdatedUtc = conversationEntity.LastAppendedUtc,
             CreatedUtc = conversationEntity.CreatedUtc,
