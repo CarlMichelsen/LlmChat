@@ -21,6 +21,8 @@ public sealed class ApplicationContext : DbContext
 
     public DbSet<ConversationEntity> Conversations { get; init; }
 
+    public DbSet<ProfileEntity> Profiles { get; init; }
+
     public DbSet<MessageEntity> Messages { get; init; }
 
     public DbSet<ContentEntity> Content { get; init; }
@@ -35,6 +37,12 @@ public sealed class ApplicationContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new ConversationEntityId(guid));
+        });
+
+        modelBuilder.Entity<ProfileEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new ProfileEntityId(guid));
         });
 
         modelBuilder.Entity<MessageEntity>(entity =>

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ConversationOption } from '../../util/client/conversationOption';
+import { ConversationOption } from '../../util/type/conversationOption';
 import { getQueryParam } from '../../util/helpers/queryParameter';
 
 type ConversationListState = {

@@ -41,7 +41,7 @@ public static class PromptMapper
 
             return new LlmPromptDto(
                 ModelIdentifier: validatedSendMessageData.SelectedModel.Id,
-                SystemMessage: "Respond very concisely. Assume that the user is a C# systems developmer and is using modern .net8 C#",
+                SystemMessage: conv.SystemMessage,
                 Messages: list);
         }
         catch (Exception e)

@@ -1,15 +1,14 @@
 ﻿using Domain.Dto.Chat;
 using Domain.Pipeline.SendMessage;
-using Implementation.Database;
+using Implementation.Pipeline;
 using Interface.Handler;
-using Interface.Pipeline;
 using Microsoft.Extensions.Logging;
 
 namespace Implementation.Handler;
 
 public class MessageHandler(
     ILogger<MessageHandler> logger,
-    ITransactionPipeline<ApplicationContext, SendMessagePipelineData> sendMessagePipeline) : IMessageHandler
+    SendMessagePipeline sendMessagePipeline) : IMessageHandler
 {
     public async Task SendMessage(
         NewMessageDto newUserMessageDto,

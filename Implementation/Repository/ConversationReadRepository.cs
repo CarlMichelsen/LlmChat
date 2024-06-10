@@ -11,12 +11,13 @@ namespace Implementation.Repository;
 public class ConversationReadRepository(
     ApplicationContext applicationContext) : IConversationReadRepository
 {
-    public async Task<Result<ConversationEntity>> GetRichConversation(Guid creatorIdentifier, ConversationEntityId conversationId)
+    public async Task<Result<ConversationEntity>> GetRichConversation(ProfileEntityId creatorIdentifier, ConversationEntityId conversationId)
     {
         try
         {
             var conversation = await applicationContext.Conversations
-                .Where(c => c.CreatorIdentifier == creatorIdentifier && c.Id == conversationId)
+                .Include(c => c.Creator)
+                .Where(c => c.Creator.Id == creatorIdentifier && c.Id == conversationId)
                 .Include(c => c.Messages)
                     .ThenInclude(m => m.Content)
                 .Include(c => c.Messages)
@@ -38,12 +39,13 @@ public class ConversationReadRepository(
         }
     }
 
-    public async Task<Result<List<ConversationEntity>>> GetShallowConversations(Guid creatorIdentifier, int amount)
+    public async Task<Result<List<ConversationEntity>>> GetShallowConversations(ProfileEntityId creatorIdentifier, int amount)
     {
         try
         {
             var conversations = await applicationContext.Conversations
-                .Where(c => c.CreatorIdentifier == creatorIdentifier)
+                .Include(c => c.Creator)
+                .Where(c => c.Creator.Id == creatorIdentifier)
                 .OrderByDescending(c => c.LastAppendedUtc)
                 .Take(amount)
                 .ToListAsync();

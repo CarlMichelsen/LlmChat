@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import ConversationOptionComponent from "./ConversationOptionComponent"
 import store, { RootApplicationState } from "../../../store";
 import { openMobileConversationList, selectConversation } from "../../../store/conversationListSlice";
-import { ConversationOption } from "../../../util/client/conversationOption";
+import { ConversationOption } from "../../../util/type/conversationOption";
 
 const MobileConversationList: React.FC<{ conversations?: ConversationOption[] }> = ({ conversations }) => {
     const conversationListState = useSelector((state: RootApplicationState) => state.conversationList);

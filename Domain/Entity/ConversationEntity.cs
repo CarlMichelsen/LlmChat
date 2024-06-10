@@ -8,7 +8,9 @@ public class ConversationEntity
 
     public string? Summary { get; set; }
 
-    public required Guid CreatorIdentifier { get; init; }
+    public required string SystemMessage { get; set; }
+
+    public required ProfileEntity Creator { get; init; }
 
     public required List<MessageEntity> Messages { get; init; }
 

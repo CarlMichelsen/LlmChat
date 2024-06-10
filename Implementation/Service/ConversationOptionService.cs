@@ -1,6 +1,7 @@
 ﻿using Domain.Abstraction;
 using Domain.Dto.Conversation;
 using Domain.Entity;
+using Domain.Entity.Id;
 using Interface.Repository;
 using Interface.Service;
 
@@ -14,7 +15,7 @@ public class ConversationOptionService(
     {
         var creatorIdentifier = sessionService.UserProfileId;
         var conversationsResult = await conversationReadRepository
-            .GetShallowConversations(creatorIdentifier, amount);
+            .GetShallowConversations(new ProfileEntityId(creatorIdentifier), amount);
         if (conversationsResult.IsError)
         {
             return conversationsResult.Error!;

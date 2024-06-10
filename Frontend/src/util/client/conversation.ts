@@ -1,46 +1,16 @@
 import { Conversation } from "../type/llmChat/conversation";
 import { ServiceResponse } from "../type/serviceResponse";
-import { ConversationOption } from "./conversationOption";
-import { rootUrl } from "./endpoints";
+import { ConversationOption } from "../type/conversationOption";
+import { serviceRequest } from "./serviceRequest";
 
 export const getConversation = async (conversationId: string): Promise<ServiceResponse<Conversation>> => {
-    try {
-        const response = await fetch(
-            `${rootUrl()}/api/v1/conversation/${conversationId}`,
-        {
-            credentials: 'include',
-        });
-
-        // Check if the request was successful
-        if (response.ok) {
-            const data = await response.json();
-            return data as ServiceResponse<Conversation>;
-        } else {
-            throw new Error(`Request failed with status: ${response.status}`);
-        }
-    } catch (error) {
-        console.error(`Fetch error: ${error}`);
-        throw error;  
-    }
+    return await serviceRequest<Conversation>("GET", `/api/v1/conversation/${conversationId}`);
 }
 
 export const getConversationOptions = async (): Promise<ServiceResponse<ConversationOption[]>> => {
-    try {
-        const response = await fetch(
-            `${rootUrl()}/api/v1/conversation/list`,
-        {
-            credentials: 'include',
-        });
+    return await serviceRequest<ConversationOption[]>("GET", "/api/v1/conversation/list");
+}
 
-        // Check if the request was successful
-        if (response.ok) {
-            const data = await response.json();
-            return data as ServiceResponse<ConversationOption[]>;
-        } else {
-            throw new Error(`Request failed with status: ${response.status}`);
-        }
-    } catch (error) {
-        console.error(`Fetch error: ${error}`);
-        throw error;  
-    }
+export const setConversationSummary = async (conversationId: string, systemMessage: string): Promise<ServiceResponse<string>> => {
+    return await serviceRequest<string>("POST", `/api/v1/conversation/${conversationId}/system`, systemMessage);
 }

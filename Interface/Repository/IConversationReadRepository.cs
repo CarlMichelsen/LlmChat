@@ -6,7 +6,7 @@ namespace Interface.Repository;
 
 public interface IConversationReadRepository
 {
-    Task<Result<ConversationEntity>> GetRichConversation(Guid creatorIdentifier, ConversationEntityId conversationId);
+    Task<Result<ConversationEntity>> GetRichConversation(ProfileEntityId creatorIdentifier, ConversationEntityId conversationId);
 
-    Task<Result<List<ConversationEntity>>> GetShallowConversations(Guid creatorIdentifier, int amount);
+    Task<Result<List<ConversationEntity>>> GetShallowConversations(ProfileEntityId creatorIdentifier, int amount);
 }

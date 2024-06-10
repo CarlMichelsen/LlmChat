@@ -1,5 +1,5 @@
-import { ServiceResponse } from "../type/serviceResponse";
-import { loginUrl, rootUrl } from "./endpoints";
+import { loginUrl } from "./endpoints";
+import { serviceRequest } from "./serviceRequest";
 
 export type LoginType = "Development" | "Guest" | "Github" | "Discord";
 
@@ -17,18 +17,5 @@ export const navigateToLoginPage = (loginType: LoginType) => {
 }
 
 export const logoutRequest = async () => {
-    const response = await fetch(
-        `${rootUrl()}/api/v1/session`,
-    {
-        method: 'delete',
-        credentials: 'include',
-    });
-
-    // Check if the request was successful
-    if (response.ok) {
-        const data = await response.json();
-        return data as ServiceResponse<boolean>;
-    } else {
-        throw new Error(`Request failed with status: ${response.status}`);
-    }
+    return await serviceRequest<boolean>("DELETE", "/api/v1/session");
 }

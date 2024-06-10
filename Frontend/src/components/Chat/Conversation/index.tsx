@@ -3,27 +3,14 @@ import store, { RootApplicationState } from "../../../store";
 import FetchLogicComponent from "./FetchLogicComponent";
 import Input from "./Input";
 import MessageList from "./MessageList";
-import { useEffect } from "react";
-import { scrollStickToBottom } from "../../../util/helpers/scrollStickToBottom";
 import ModelSelector from "./ModelSelector";
 import Dialog from "../../Dialog";
 import { setDialogOpen } from "../../../store/modelSlice";
 import ModelSelectorWindow from "./ModelSelector/ModelSelectorWindow";
 
-/*
-isOpen: boolean;
-onClose: () => void;
-children: React.ReactNode;
-*/
-
 const Conversation: React.FC = () => {
     const modelState = useSelector((state: RootApplicationState) => state.models);
     const conversationState = useSelector((state: RootApplicationState) => state.conversation);
-    useEffect(() => {
-        if (conversationState.conversation != null) {
-            scrollStickToBottom(true);
-        }
-    }, [conversationState.conversation]);
 
     return (
         <>

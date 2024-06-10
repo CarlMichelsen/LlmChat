@@ -46,7 +46,7 @@ public class AppendResponseMessagePipelineStep(
             SelectedModel = data.ValidatedSendMessageData.SelectedModel,
             Content = data.ResponseMessageContent.Select(c => MessageDtoMapper.Map(c)).ToList(),
         };
-        var responseInitiationResult = await messageInitiationRepository.InitiateMessage(
+        var responseInitiationResult = messageInitiationRepository.InitiateMessage(
             validatedResponseMessageData,
             data.Conversation,
             data.NextMessageIdentifier == Guid.Empty ? default : new MessageEntityId(data.NextMessageIdentifier),

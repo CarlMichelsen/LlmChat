@@ -27,7 +27,7 @@ public class AppendUserMessagePipelineStep(
             return await streamWriterService.WriteError("Expected conversation to have already been created");
         }
 
-        var messageResult = await messageInitiationRepository.InitiateMessage(
+        var messageResult = messageInitiationRepository.InitiateMessage(
             data.ValidatedSendMessageData,
             data.Conversation,
             default,

@@ -47,7 +47,7 @@ public class SummaryService(
         var summary = summaryResult.Unwrap();
         conversationEntity.Summary = summary;
         conversationEntity.LastAppendedUtc = DateTime.UtcNow;
-        await applicationContext.SaveChangesAsync();
+        applicationContext.SaveChanges();
 
         return summary;
     }

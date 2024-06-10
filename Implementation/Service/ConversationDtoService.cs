@@ -35,7 +35,7 @@ public class ConversationDtoService(
     {
         var creatorIdentifier = sessionService.UserProfileId;
         var conversationResult = await conversationReadRepository
-            .GetRichConversation(creatorIdentifier, conversationId);
+            .GetRichConversation(new ProfileEntityId(creatorIdentifier), conversationId);
         if (conversationResult.IsError)
         {
             return conversationResult.Error!;

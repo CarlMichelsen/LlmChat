@@ -1,4 +1,4 @@
-import { ConversationOption } from "../../../util/client/conversationOption";
+import { ConversationOption } from "../../../util/type/conversationOption";
 
 type ConversationOptionComponentProps = {
     option: ConversationOption;
