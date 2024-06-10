@@ -16,7 +16,7 @@ const ConversationList: React.FC<{ conversations?: ConversationOption[] }> = ({ 
             <div className={`relative h-[50px] grid ${conversationListState.desktopIsOpen ? "grid-cols-[1fr_50px]" : "grid-cols-1"}`}>
                 <div className={conversationListState.desktopIsOpen ? "block" : "hidden"}>
                     <button
-                        className="w-full h-full bg-blue-500 text-white hover:underline overflow-hidden break-keep"
+                        className="w-full h-full bg-blue-600 text-white hover:underline overflow-hidden break-keep"
                         onMouseDown={() => store.dispatch(selectConversation(null))}>
                         <p className="mx-auto w-48">Create new conversation</p>
                     </button>

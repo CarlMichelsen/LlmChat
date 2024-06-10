@@ -84,7 +84,7 @@ export class MessageStreamHandler
             }
 
             store.dispatch(appendStream({ conversationId: this.conversationId!, content: contentDelta.content }));
-            scrollStickToBottom();
+            setTimeout(scrollStickToBottom, 0);
         }
 
         if (contentDelta.summary != null) {

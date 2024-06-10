@@ -13,6 +13,7 @@ type MessageComponentProps = {
 }
 
 const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conversationId, index }) => {
+    const modelState = useSelector((state: RootApplicationState) => state.models);
     const userState = useSelector((state: RootApplicationState) => state.user);
     const msg = dialogSlice.messages[dialogSlice.selectedIndex];
     const imgUrl = msg.prompt ? robotIcon : userState.user!.avatarUrl;
@@ -26,11 +27,28 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conver
         store.dispatch(selectMessage({ conversationId, messageId: messageId }));
     }
 
+    const getModelDisplayName = (modelId?: string): string|null => {
+        if (!modelId) {
+            return null;
+        }
+
+        if (!modelState.models) {
+            return null;
+        }
+
+        const model = modelState.models.find(m => m.id === modelId);
+        if (!model) {
+            return null;
+        }
+
+        return model.modelDisplayName;
+    }
+
     return (
         <li>
             <DisplayMessageComponent
                 isUser={!msg.prompt}
-                displayName={msg.prompt?.modelName ?? userState.user!.name}
+                displayName={getModelDisplayName(msg.prompt?.modelId) ?? msg.prompt?.modelName ?? userState.user!.name}
                 imageUrl={imgUrl}
                 inputTokens={msg.prompt?.inputTokens ?? 0}
                 outputTokens={msg.prompt?.outputTokens ?? 0}
