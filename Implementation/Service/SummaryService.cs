@@ -2,7 +2,6 @@
 using Domain.Configuration;
 using Domain.Entity;
 using Domain.Exception;
-using Implementation.Database;
 using Interface.Service;
 using LargeLanguageModelClient;
 using LargeLanguageModelClient.Dto.Prompt;
@@ -13,8 +12,7 @@ namespace Implementation.Service;
 
 public class SummaryService(
     IOptions<ConversationOptions> conversationOptions,
-    ILargeLanguageModelClient largeLanguageModelClient,
-    ApplicationContext applicationContext) : ISummaryService
+    ILargeLanguageModelClient largeLanguageModelClient) : ISummaryService
 {
     public async Task<Result<string>> GenerateSummary(ConversationEntity conversationEntity)
     {
@@ -34,22 +32,6 @@ public class SummaryService(
         }
 
         return text;
-    }
-
-    public async Task<Result<string>> GenerateAndApplySummary(ConversationEntity conversationEntity)
-    {
-        var summaryResult = await this.GenerateSummary(conversationEntity);
-        if (summaryResult.IsError)
-        {
-            return summaryResult.Error!;
-        }
-
-        var summary = summaryResult.Unwrap();
-        conversationEntity.Summary = summary;
-        conversationEntity.LastAppendedUtc = DateTime.UtcNow;
-        applicationContext.SaveChanges();
-
-        return summary;
     }
 
     private static LlmContent Map(ContentEntity contentEntity)

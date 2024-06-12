@@ -25,7 +25,7 @@ public class SummaryGenerationStep(
             return data;
         }
 
-        var summaryResult = await summaryService.GenerateAndApplySummary(data.Conversation);
+        var summaryResult = await summaryService.GenerateSummary(data.Conversation);
         if (summaryResult.IsError)
         {
             return await streamWriterService.WriteError("Failed to generate conversation summary", summaryResult.Error!);
@@ -33,7 +33,6 @@ public class SummaryGenerationStep(
 
         data.Conversation.Summary = summaryResult.Unwrap();
         await streamWriterService.WriteSummary(data.Conversation.Id, data.Conversation.Summary);
-        context.SaveChanges();
 
         return data;
     }

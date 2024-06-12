@@ -4,13 +4,11 @@ using Domain.Entity;
 using Domain.Entity.Id;
 using Domain.Exception;
 using Domain.Pipeline.SendMessage;
-using Implementation.Database;
 using Interface.Repository;
 
 namespace Implementation.Repository;
 
-public class MessageInitiationRepository(
-    ApplicationContext applicationContext) : IMessageInitiationRepository
+public class MessageInitiationRepository() : IMessageInitiationRepository
 {
     public Result<MessageEntity> InitiateMessage(
         ValidatedSendMessageData validatedSendMessageData,
@@ -66,8 +64,6 @@ public class MessageInitiationRepository(
         
         conversationEntity.Messages.Add(newMessage);
         conversationEntity.LastAppendedUtc = DateTime.UtcNow;
-
-        applicationContext.SaveChanges();
         return newMessage;
     }
 }

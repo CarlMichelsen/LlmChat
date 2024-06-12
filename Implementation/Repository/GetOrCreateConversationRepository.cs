@@ -35,8 +35,7 @@ public class GetOrCreateConversationRepository(
                 CreatedUtc = DateTime.UtcNow,
             };
 
-            var added = await applicationContext.Conversations.AddAsync(conv);
-            applicationContext.SaveChanges();
+            var added = applicationContext.Conversations.Add(conv);
             return added.Entity;
         }
         else

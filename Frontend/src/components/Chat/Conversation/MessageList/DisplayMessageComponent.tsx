@@ -28,7 +28,7 @@ const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
 
         return (
             <div key={index}>
-                <p>{content.content}</p>
+                <pre className="font-sans w-full overflow-auto whitespace-break-spaces">{content.content}</pre>
             </div>
         );
     }

@@ -6,6 +6,4 @@ namespace Interface.Service;
 public interface ISummaryService
 {
     Task<Result<string>> GenerateSummary(ConversationEntity conversationEntity);
-
-    Task<Result<string>> GenerateAndApplySummary(ConversationEntity conversationEntity);
 }

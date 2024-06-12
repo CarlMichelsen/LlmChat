@@ -34,7 +34,8 @@ public abstract class BaseTransactionPipeline<T, TR> : ITransactionPipeline<T, T
                     if (result.Error is OperationCanceledException canceled)
                     {
                         // Note, this does not roll back the transaction.
-                        transaction.Commit();
+                        this.Context.SaveChanges();
+                        await transaction.CommitAsync();
                         return canceled;
                     }
 
@@ -47,7 +48,8 @@ public abstract class BaseTransactionPipeline<T, TR> : ITransactionPipeline<T, T
             }
             while (step is not null);
 
-            transaction.Commit();
+            this.Context.SaveChanges();
+            await transaction.CommitAsync();
             return data;
         }
         catch (Exception e)

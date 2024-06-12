@@ -22,7 +22,6 @@ public class ProfileRepository(
             {
                 profile = this.Create(profileIdentifier);
                 applicationContext.Profiles.Add(profile);
-                applicationContext.SaveChanges();
             }
 
             return profile;
@@ -49,8 +48,6 @@ public class ProfileRepository(
             }
 
             profile.DefaultSystemMessage = systemMessage;
-            await applicationContext.SaveChangesAsync();
-
             return profile.DefaultSystemMessage;
         }
         catch (Exception e)

@@ -8,7 +8,7 @@ public class DialogSliceDto
     public required List<MessageDto> Messages { get; set; }
 
     [JsonPropertyName("selectedIndex")]
-    public required int SelectedIndex { get; init; }
+    public required int SelectedIndex { get; set; }
 
     [JsonPropertyName("visible")]
     public required bool Visible { get; set; }

@@ -73,6 +73,7 @@ public static class ConversationDtoMapper
 
         slice.Messages.AddRange(sliceMessages);
         slice.Messages = slice.Messages.DistinctBy(x => x.Id).ToList();
+        slice.SelectedIndex = slice.Messages.Count - 1;
 
         var prevSlice = dialogSliceList.ElementAtOrDefault(index - 1);
         if (prevSlice is not null && isVisible)

@@ -13,7 +13,7 @@ public class MessageInitiationRepositoryTests : TestDatabase
 
     public MessageInitiationRepositoryTests()
     {
-        this.sut = new MessageInitiationRepository(this.Context);
+        this.sut = new MessageInitiationRepository();
     }
 
     [Fact]
