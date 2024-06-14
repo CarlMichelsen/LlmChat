@@ -21,8 +21,8 @@ export const serviceRequest = async <T>(method: "GET"|"POST"|"DELETE", path: str
 
         // Check if the request was successful
         if (response.ok) {
-            const data = await response.json();
-            return data as ServiceResponse<T>;
+            const data = await response.json() as ServiceResponse<T>;
+            return data;
         } else {
             throw new Error(`${method} "${fullDestination}" request failed with status: ${response.status}`);
         }

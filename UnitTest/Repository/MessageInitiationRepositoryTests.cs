@@ -17,7 +17,7 @@ public class MessageInitiationRepositoryTests : TestDatabase
     }
 
     [Fact]
-    public async Task RespondingToExsistingConversationResultsInResponseBeingProperlyAddedToSlice()
+    public async Task RespondToMessage()
     {
         // Arrange
         await this.ExecuteDatabaseSeed();
@@ -30,8 +30,11 @@ public class MessageInitiationRepositoryTests : TestDatabase
 
         var validatedSendMessageData = new ValidatedSendMessageData
         {
-            RequestConversationId = ConversationMockDataGenerator.SeededConversationId,
-            ResponseToMessageId = ConversationMockDataGenerator.SeededSecondMessageId,
+            ResponseTo = new ResponseToData
+            {
+                ConversationId = ConversationMockDataGenerator.SeededConversationId,
+                MessageId = ConversationMockDataGenerator.SeededSecondMessageId,
+            },
             Content = [content],
             SelectedModel = ConversationMockDataGenerator.MockModel,
         };
@@ -39,7 +42,9 @@ public class MessageInitiationRepositoryTests : TestDatabase
         // Act
         var foundConversation = await this.Context.Conversations
             .Where(c => c.Id == ConversationMockDataGenerator.SeededConversationId)
-            .Include(c => c.Messages)
+            .Include(c => c.DialogSlices)
+                .ThenInclude(d => d.Messages)
+                    .ThenInclude(m => m.PreviousMessage)
             .FirstAsync(CancellationToken.None);
         var result = this.sut.InitiateMessage(
             validatedSendMessageData,
@@ -54,12 +59,13 @@ public class MessageInitiationRepositoryTests : TestDatabase
         Assert.IsNotType<Exception>(result.Error);
         Assert.Null(result.Error);
         var conv = await this.Context.Conversations
-            .Include(c => c.Messages)
-                .ThenInclude(m => m.Content)
+            .Include(c => c.DialogSlices)
+                .ThenInclude(d => d.Messages)
+                    .ThenInclude(m => m.PreviousMessage)
             .FirstOrDefaultAsync();
         
         Assert.NotNull(conv);
-        Assert.True(conv.Messages.Exists(m => m.Content.First().Content == content.Content));
+        Assert.True(conv.DialogSlices.Last().Messages.Exists(m => m.Content.First().Content == content.Content));
     }
 
     protected override void SeedDatabase()

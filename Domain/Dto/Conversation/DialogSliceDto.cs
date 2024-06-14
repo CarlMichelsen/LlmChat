@@ -4,6 +4,9 @@ namespace Domain.Dto.Conversation;
 
 public class DialogSliceDto
 {
+    [JsonPropertyName("id")]
+    public required Guid Id { get; init; }
+
     [JsonPropertyName("messages")]
     public required List<MessageDto> Messages { get; set; }
 

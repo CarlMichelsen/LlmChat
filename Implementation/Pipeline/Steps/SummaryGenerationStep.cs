@@ -20,12 +20,17 @@ public class SummaryGenerationStep(
             return await streamWriterService.WriteError("Expected conversation to have already been created");
         }
 
+        if (data.ResponseMessage is null)
+        {
+            return await streamWriterService.WriteError("Expected ResponseMessage to have already been created");
+        }
+
         if (!string.IsNullOrWhiteSpace(data.Conversation.Summary))
         {
             return data;
         }
 
-        var summaryResult = await summaryService.GenerateSummary(data.Conversation);
+        var summaryResult = await summaryService.GenerateSummary(data.Conversation, data.ResponseMessage.Id);
         if (summaryResult.IsError)
         {
             return await streamWriterService.WriteError("Failed to generate conversation summary", summaryResult.Error!);

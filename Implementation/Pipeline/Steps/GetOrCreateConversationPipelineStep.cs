@@ -24,7 +24,7 @@ public class GetOrCreateConversationPipelineStep(
 
         var conversationResult = await getOrCreateConversationRepository.GetOrCreateConversation(
             sessionService.UserProfileId,
-            data.ValidatedSendMessageData.RequestConversationId);
+            data.ValidatedSendMessageData.ResponseTo?.ConversationId);
         if (conversationResult.IsError)
         {
             return await streamWriterService.WriteError("Failed to get or create conversation", conversationResult.Error!);

@@ -27,7 +27,7 @@ public class ConversationDtoCacheService(
 
     public async Task CacheConversationDto(ConversationDto conversationDto)
     {
-        var key = this.GenerateConversationCacheKey(sessionService.UserProfileId, Guid.Parse(conversationDto.Id));
+        var key = this.GenerateConversationCacheKey(sessionService.UserProfileId, conversationDto.Id);
         await cacheService.SetJson(key, conversationDto, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(15),

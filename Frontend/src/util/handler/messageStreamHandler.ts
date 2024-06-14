@@ -55,7 +55,7 @@ export class MessageStreamHandler
             store.dispatch(selectConversation(this.conversationId));
 
 
-            if (!this.promptMessage.conversationId) {
+            if (!this.promptMessage.responseTo) {
                 const conversationOption: ConversationOption = {
                     id: this.conversationId,
                     summary: undefined,
@@ -135,7 +135,7 @@ export class MessageStreamHandler
             id: userMessageId,
             content: newMessage.content,
             completedUtc: (new Date()).toUTCString(),
-            previousMessageId: newMessage.responseToMessageId
+            previousMessageId: newMessage.responseTo!.responseToMessageId
         }
 
         return {

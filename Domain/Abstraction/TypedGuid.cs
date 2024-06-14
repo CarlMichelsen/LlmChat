@@ -3,7 +3,6 @@
 namespace Domain.Abstraction;
 
 public abstract class TypedGuid<T>
-    where T : TypedGuid<T>
 {
     protected TypedGuid(Guid value)
     {

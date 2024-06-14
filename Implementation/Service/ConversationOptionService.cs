@@ -31,7 +31,7 @@ public class ConversationOptionService(
     {
         return new ConversationOptionDto
         {
-            Id = conversationEntity.Id.ToString(),
+            Id = conversationEntity.Id.Value,
             Summary = conversationEntity.Summary,
             LastAppendedUtc = conversationEntity.LastAppendedUtc,
             CreatedUtc = conversationEntity.CreatedUtc,

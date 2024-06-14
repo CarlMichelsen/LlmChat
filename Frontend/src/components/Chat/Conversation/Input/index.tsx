@@ -5,6 +5,7 @@ import { getLatestMessageId } from "../../../../util/helpers/getLatestMessageId"
 import { NewMessage } from "../../../../util/type/llmChat/newMessage";
 import { MessageStreamHandler } from "../../../../util/handler/messageStreamHandler";
 import TextField from "./TextField";
+import { ResponseTo } from "../../../../util/type/llmChat/responseTo";
 
 type InputProps = {
     selectedConversationId?: string;
@@ -44,9 +45,27 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
     }
 
     const sendActualMessage = async () => {
+        let responseTo: ResponseTo|undefined;
+        const responseToMessageId = getEditingMessage()?.previousMessageId
+            ?? getLatestMessageId(conversationState.conversation)
+            ?? null
+
+        if (responseToMessageId && selectedConversationId) {
+            const responseToDialogSlice = conversationState.conversation?.dialogSlices
+                .find(d => d.messages.find(m => m.id === responseToMessageId));
+            
+            if (!responseToDialogSlice) {
+                throw new Error("Unable to find dialog slice of message being responded to");
+            }
+
+            responseTo = {
+                conversationId: selectedConversationId,
+                responseToMessageId: responseToMessageId,
+            } satisfies ResponseTo;
+        }
+
         const payload: NewMessage = {
-            conversationId: selectedConversationId,
-            responseToMessageId: getEditingMessage()?.previousMessageId ?? getLatestMessageId(conversationState.conversation) ?? null,
+            responseTo: responseTo,
             content: [{ contentType: "Text", content: getTextAreaValue() }],
             modelIdentifier: modelState.selectedModelId,
         };

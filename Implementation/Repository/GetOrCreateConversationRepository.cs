@@ -30,7 +30,7 @@ public class GetOrCreateConversationRepository(
                 Id = new ConversationEntityId(Guid.NewGuid()),
                 Creator = profile,
                 SystemMessage = profile.DefaultSystemMessage,
-                Messages = [],
+                DialogSlices = [],
                 LastAppendedUtc = DateTime.UtcNow,
                 CreatedUtc = DateTime.UtcNow,
             };

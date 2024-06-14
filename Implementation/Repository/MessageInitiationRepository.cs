@@ -8,23 +8,32 @@ using Interface.Repository;
 
 namespace Implementation.Repository;
 
-public class MessageInitiationRepository() : IMessageInitiationRepository
+public class MessageInitiationRepository : IMessageInitiationRepository
 {
-    public Result<MessageEntity> InitiateMessage(
+    public Result<(MessageEntity Message, DialogSliceEntity DialogSlice)> InitiateMessage(
         ValidatedSendMessageData validatedSendMessageData,
         ConversationEntity conversationEntity,
-        MessageEntityId? messageEntityId,
+        MessageEntityId? predeterminedMessageEntityId,
         StreamUsage? llmStreamTotalUsage)
     {
-        MessageEntity? responseToMessage = default;
-        if (validatedSendMessageData.ResponseToMessageId is not null)
+        (DialogSliceEntity DialogSlice, MessageEntity Message)? responseToDialogSliceAndMessage = default;
+        if (validatedSendMessageData.ResponseTo is not null)
         {
-            responseToMessage = conversationEntity.Messages
-                .FirstOrDefault(m => m.Id == validatedSendMessageData.ResponseToMessageId);
-            if (responseToMessage is null)
+            var dialogSlice = conversationEntity.DialogSlices
+                .FirstOrDefault(dse => dse.Messages.Exists(m => m.Id == validatedSendMessageData.ResponseTo.MessageId));
+            if (dialogSlice is null)
+            {
+                return new SafeUserFeedbackException("Failed to find dialog slice to respond to");
+            }
+
+            var message = dialogSlice.Messages
+                .FirstOrDefault(m => m.Id == validatedSendMessageData.ResponseTo.MessageId);
+            if (message is null)
             {
                 return new SafeUserFeedbackException("Failed to find message to respond to");
             }
+
+            responseToDialogSliceAndMessage = (DialogSlice: dialogSlice, Message: message);
         }
 
         PromptEntity? prompt = default;
@@ -46,24 +55,44 @@ public class MessageInitiationRepository() : IMessageInitiationRepository
         }
 
         var isUserMessage = prompt is null;
-
-        if (responseToMessage is not null && isUserMessage && responseToMessage.IsUserMessage)
-        {
-            return new SafeUserFeedbackException("Unable to respond with a user message to another user message.");
-        }
-
         var newMessage = new MessageEntity
         {
-            Id = messageEntityId ?? new MessageEntityId(Guid.NewGuid()),
+            Id = predeterminedMessageEntityId ?? new MessageEntityId(Guid.NewGuid()),
             IsUserMessage = isUserMessage,
             Content = validatedSendMessageData.Content,
             Prompt = prompt,
-            PreviousMessage = responseToMessage,
+            PreviousMessage = responseToDialogSliceAndMessage?.Message,
             CompletedUtc = DateTime.UtcNow,
         };
+
+        if (responseToDialogSliceAndMessage is not null
+            && newMessage.IsUserMessage
+            && responseToDialogSliceAndMessage.Value.Message.IsUserMessage)
+        {
+            return new SafeUserFeedbackException("Unable to respond to a user message with another user message.");
+        }
+
+        var dialogSliceEntityIndex = responseToDialogSliceAndMessage?.DialogSlice is not null
+            ? conversationEntity.DialogSlices.FindIndex(ds => ds.Id == responseToDialogSliceAndMessage.Value.DialogSlice.Id) + 1
+            : 0;
         
-        conversationEntity.Messages.Add(newMessage);
+        if (dialogSliceEntityIndex == 0 && !isUserMessage)
+        {
+            return new SafeUserFeedbackException("Initial message has to be from user.");
+        }
+
+        var currentDialogSlice = conversationEntity.DialogSlices.ElementAtOrDefault(dialogSliceEntityIndex) ?? new DialogSliceEntity
+            {
+                Id = new DialogSliceEntityId(Guid.NewGuid()),
+                Messages = [],
+                SelectedMessageGuid = default,
+                CreatedUtc = DateTime.UtcNow,
+            };
+        currentDialogSlice.Messages.Add(newMessage);
+        currentDialogSlice.SelectedMessageGuid = newMessage.Id.Value;
+        conversationEntity.DialogSlices.Add(currentDialogSlice);
+
         conversationEntity.LastAppendedUtc = DateTime.UtcNow;
-        return newMessage;
+        return (newMessage, currentDialogSlice);
     }
 }

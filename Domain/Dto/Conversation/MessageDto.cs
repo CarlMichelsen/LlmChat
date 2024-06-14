@@ -5,7 +5,7 @@ namespace Domain.Dto.Conversation;
 public class MessageDto
 {
     [JsonPropertyName("id")]
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
     
     [JsonPropertyName("prompt")]
     public required PromptDto? Prompt { get; init; }
@@ -17,5 +17,5 @@ public class MessageDto
     public required DateTime CompletedUtc { get; init; }
 
     [JsonPropertyName("previousMessageId")]
-    public required string? PreviousMessageId { get; init; }
+    public required Guid? PreviousMessageId { get; init; }
 }

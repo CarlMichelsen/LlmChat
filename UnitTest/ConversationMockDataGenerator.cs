@@ -10,7 +10,11 @@ public static class ConversationMockDataGenerator
 
     public static ConversationEntityId SeededConversationId { get; } = new(Guid.NewGuid());
 
+    public static DialogSliceEntityId SeededInitialSliceId { get; } = new(Guid.NewGuid());
+
     public static MessageEntityId SeededInitialMessageId { get; } = new(Guid.NewGuid());
+
+    public static DialogSliceEntityId SeededSecondSliceId { get; } = new(Guid.NewGuid());
 
     public static MessageEntityId SeededSecondMessageId { get; } = new(Guid.NewGuid());
 
@@ -79,12 +83,29 @@ public static class ConversationMockDataGenerator
 
         var profile = GenerateProfileEntity();
 
+        var tenMinutesAgo = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(10));
         return new ConversationEntity
         {
             Id = SeededConversationId,
             Creator = profile,
             SystemMessage = profile.DefaultSystemMessage,
-            Messages = [m1, m2],
+            DialogSlices =
+            [
+                new DialogSliceEntity
+                {
+                    Id = SeededInitialSliceId,
+                    Messages = [m1],
+                    SelectedMessageGuid = m1.Id.Value,
+                    CreatedUtc = tenMinutesAgo,
+                },
+                new DialogSliceEntity
+                {
+                    Id = SeededSecondSliceId,
+                    Messages = [m2],
+                    SelectedMessageGuid = m2.Id.Value,
+                    CreatedUtc = tenMinutesAgo.Add(TimeSpan.FromMinutes(1)),
+                },
+            ],
             LastAppendedUtc = DateTime.UtcNow,
             CreatedUtc = DateTime.UtcNow,
         };

@@ -4,6 +4,7 @@ import { ConversationOption } from "../type/conversationOption";
 import { serviceRequest } from "./serviceRequest";
 
 export const getConversation = async (conversationId: string): Promise<ServiceResponse<Conversation>> => {
+    console.log("CONVERSATION", conversationId);
     return await serviceRequest<Conversation>("GET", `/api/v1/conversation/${conversationId}`);
 }
 

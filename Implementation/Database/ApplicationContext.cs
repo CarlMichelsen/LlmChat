@@ -1,4 +1,5 @@
-﻿using Domain.Entity;
+﻿using Domain.Abstraction;
+using Domain.Entity;
 using Domain.Entity.Id;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +24,8 @@ public sealed class ApplicationContext : DbContext
 
     public DbSet<ProfileEntity> Profiles { get; init; }
 
+    public DbSet<DialogSliceEntity> DialogSlices { get; init; }
+
     public DbSet<MessageEntity> Messages { get; init; }
 
     public DbSet<ContentEntity> Content { get; init; }
@@ -43,6 +46,12 @@ public sealed class ApplicationContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new ProfileEntityId(guid));
+        });
+
+        modelBuilder.Entity<DialogSliceEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new DialogSliceEntityId(guid));
         });
 
         modelBuilder.Entity<MessageEntity>(entity =>

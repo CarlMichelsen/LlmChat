@@ -74,6 +74,27 @@ namespace App.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DialogSlices",
+                schema: "LlmChat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SelectedMessageGuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ConversationEntityId = table.Column<Guid>(type: "uuid", nullable: true),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DialogSlices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DialogSlices_Conversations_ConversationEntityId",
+                        column: x => x.ConversationEntityId,
+                        principalSchema: "LlmChat",
+                        principalTable: "Conversations",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Messages",
                 schema: "LlmChat",
                 columns: table => new
@@ -83,16 +104,16 @@ namespace App.Migrations
                     PromptId = table.Column<Guid>(type: "uuid", nullable: true),
                     PreviousMessageId = table.Column<Guid>(type: "uuid", nullable: true),
                     CompletedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ConversationEntityId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DialogSliceEntityId = table.Column<Guid>(type: "uuid", nullable: true),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Messages_Conversations_ConversationEntityId",
-                        column: x => x.ConversationEntityId,
+                        name: "FK_Messages_DialogSlices_DialogSliceEntityId",
+                        column: x => x.DialogSliceEntityId,
                         principalSchema: "LlmChat",
-                        principalTable: "Conversations",
+                        principalTable: "DialogSlices",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Messages_Messages_PreviousMessageId",
@@ -142,10 +163,16 @@ namespace App.Migrations
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_ConversationEntityId",
+                name: "IX_DialogSlices_ConversationEntityId",
+                schema: "LlmChat",
+                table: "DialogSlices",
+                column: "ConversationEntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_DialogSliceEntityId",
                 schema: "LlmChat",
                 table: "Messages",
-                column: "ConversationEntityId");
+                column: "DialogSliceEntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_PreviousMessageId",
@@ -172,11 +199,15 @@ namespace App.Migrations
                 schema: "LlmChat");
 
             migrationBuilder.DropTable(
-                name: "Conversations",
+                name: "DialogSlices",
                 schema: "LlmChat");
 
             migrationBuilder.DropTable(
                 name: "Prompts",
+                schema: "LlmChat");
+
+            migrationBuilder.DropTable(
+                name: "Conversations",
                 schema: "LlmChat");
 
             migrationBuilder.DropTable(

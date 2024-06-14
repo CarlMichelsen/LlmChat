@@ -1,7 +1,7 @@
 ﻿using Domain.Abstraction;
 using Domain.Dto.Conversation;
 using Domain.Entity;
-using Domain.Exception;
+using Domain.Entity.Id;
 
 namespace Implementation.Map;
 
@@ -9,93 +9,59 @@ public static class ConversationDtoMapper
 {
     public static Result<ConversationDto> Map(ConversationEntity conversationEntity)
     {
-        var dialogSliceResult = Map(conversationEntity.Messages);
-        if (dialogSliceResult.IsError)
-        {
-            return dialogSliceResult.Error!;
-        }
-
         return new ConversationDto
         {
-            Id = conversationEntity.Id.ToString(),
+            Id = conversationEntity.Id.Value,
             Summary = conversationEntity.Summary,
             SystemMessage = conversationEntity.SystemMessage,
-            DialogSlices = dialogSliceResult.Unwrap(),
+            DialogSlices = Map(conversationEntity.DialogSlices),
             LastUpdatedUtc = conversationEntity.LastAppendedUtc,
             CreatedUtc = conversationEntity.CreatedUtc,
         };
     }
 
-    private static Result<List<DialogSliceDto>> Map(List<MessageEntity> messageEntities)
+    private static List<DialogSliceDto> Map(List<DialogSliceEntity> dialogSliceEntities)
     {
-        var rootMessages = messageEntities.Where(m => m.PreviousMessage is null).ToList();
-        if (rootMessages.Count == 0)
+        var list = new List<DialogSliceDto>();
+        var visible = true;
+        for (int i = 0; i < dialogSliceEntities.Count; i++)
         {
-            var ex = new SafeUserFeedbackException("Found no root messages in conversation");
-            return ex;
+            var dse = dialogSliceEntities.ElementAt(i);
+            var prevDse = dialogSliceEntities.ElementAtOrDefault(i - 1);
+            if (prevDse is not null && visible)
+            {
+                var currentSelectedMessage = dse.Messages.First(m => m.Id.Value == dse.SelectedMessageGuid);
+                if (currentSelectedMessage.PreviousMessage is not null)
+                {
+                    var prevSelectedMessage = prevDse.Messages.First(m => m.Id.Value == prevDse.SelectedMessageGuid);
+                    visible = currentSelectedMessage.PreviousMessage.Id == prevSelectedMessage.Id;
+                }
+            }
+
+            list.Add(Map(dse, visible));
         }
 
-        List<DialogSliceDto> dialogSliceList = [];
-        MapSlicesRecursive(messageEntities, dialogSliceList, rootMessages, 0, true);
-        
-        return dialogSliceList;
+        return list;
     }
 
-    private static void MapSlicesRecursive(
-        List<MessageEntity> allMessages,
-        List<DialogSliceDto> dialogSliceList,
-        List<MessageEntity> nextMessages,
-        int index,
-        bool visible)
+    private static DialogSliceDto Map(DialogSliceEntity dialogSliceEntity, bool visible)
     {
-        var isVisible = visible;
-        if (nextMessages.Count == 0)
+        var msgId = dialogSliceEntity.SelectedMessageGuid == Guid.Empty
+            ? new MessageEntityId(dialogSliceEntity.SelectedMessageGuid)
+            : default;
+        
+        var selectedIndex = msgId is not null
+            ? dialogSliceEntity.Messages.FindIndex(m => m.Id == msgId)
+            : -1;
+
+        var messageDtos = dialogSliceEntity.Messages.OrderBy(m => m.CompletedUtc).Select(MessageDtoMapper.Map).ToList();
+
+        return new DialogSliceDto
         {
-            return;
-        }
-
-        DialogSliceDto? slice = dialogSliceList.ElementAtOrDefault(index);
-        if (slice is null)
-        {
-            slice = new DialogSliceDto
-            {
-                Messages = [],
-                SelectedIndex = 0,
-                Visible = isVisible,
-            };
-            dialogSliceList.Add(slice);
-        }
-
-        var sliceMessages = nextMessages
-            .OrderBy(x => x.CompletedUtc)
-            .Select(MessageDtoMapper.Map)
-            .ToList();
-
-        slice.Messages.AddRange(sliceMessages);
-        slice.Messages = slice.Messages.DistinctBy(x => x.Id).ToList();
-        slice.SelectedIndex = slice.Messages.Count - 1;
-
-        var prevSlice = dialogSliceList.ElementAtOrDefault(index - 1);
-        if (prevSlice is not null && isVisible)
-        {
-            var exisists = prevSlice.Messages.ElementAt(prevSlice.SelectedIndex).Id == slice.Messages.ElementAt(slice.SelectedIndex).PreviousMessageId;
-            slice.Visible = exisists;
-            isVisible = exisists;
-        }
-
-        foreach (var sliceMessage in nextMessages)
-        {
-            var nextSliceMessages = allMessages
-                .Where(x => x.PreviousMessage is not null)
-                .Where(x => x.PreviousMessage!.Id == sliceMessage.Id)
-                .ToList();
-            
-            MapSlicesRecursive(
-                allMessages,
-                dialogSliceList,
-                nextSliceMessages,
-                index + 1,
-                isVisible);
-        }
+            Id = dialogSliceEntity.Id.Value,
+            Messages = messageDtos,
+            SelectedIndex = selectedIndex == -1 ? messageDtos.Count - 1 : selectedIndex,
+            Visible = visible,
+        };
     }
 }
