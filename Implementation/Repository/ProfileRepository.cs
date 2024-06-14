@@ -22,7 +22,6 @@ public class ProfileRepository(
             {
                 profile = this.Create(profileIdentifier);
                 applicationContext.Profiles.Add(profile);
-                applicationContext.SaveChanges();
             }
 
             return profile;
@@ -42,15 +41,16 @@ public class ProfileRepository(
                 return new SafeUserFeedbackException("Invalid system message");
             }
 
-            var profile = await applicationContext.Profiles.FindAsync(profileIdentifier);
-            if (profile is null)
+            var profileResult = await this.GetAndOrCreateProfile(profileIdentifier);
+            if (profileResult.IsError)
             {
-                return new SafeUserFeedbackException("Failed to find profile to set default system message");
+                return profileResult.Error!;
             }
 
+            var profile = profileResult.Unwrap();
             profile.DefaultSystemMessage = systemMessage;
             await applicationContext.SaveChangesAsync();
-
+            
             return profile.DefaultSystemMessage;
         }
         catch (Exception e)

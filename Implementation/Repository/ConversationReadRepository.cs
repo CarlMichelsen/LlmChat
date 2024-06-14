@@ -18,19 +18,25 @@ public class ConversationReadRepository(
             var conversation = await applicationContext.Conversations
                 .Include(c => c.Creator)
                 .Where(c => c.Creator.Id == creatorIdentifier && c.Id == conversationId)
-                .Include(c => c.Messages)
-                    .ThenInclude(m => m.Content)
-                .Include(c => c.Messages)
-                    .ThenInclude(m => m.Prompt)
-                .Include(c => c.Messages)
-                    .ThenInclude(m => m.PreviousMessage)
+                .Include(c => c.DialogSlices)
+                    .ThenInclude(d => d.Messages)
+                        .ThenInclude(m => m.Content)
+                .Include(c => c.DialogSlices)
+                    .ThenInclude(d => d.Messages)
+                        .ThenInclude(m => m.Prompt)
+                .Include(c => c.DialogSlices)
+                    .ThenInclude(d => d.Messages)
+                        .ThenInclude(m => m.PreviousMessage)
                 .FirstOrDefaultAsync();
             
             if (conversation is null)
             {
                 return new SafeUserFeedbackException("Did not find conversation");
             }
-            
+
+            conversation.DialogSlices = conversation.DialogSlices
+                .OrderBy(ds => ds.CreatedUtc)
+                .ToList();
             return conversation;
         }
         catch (Exception e)

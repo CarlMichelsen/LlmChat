@@ -12,7 +12,7 @@ public class ConversationEntity
 
     public required ProfileEntity Creator { get; init; }
 
-    public required List<MessageEntity> Messages { get; init; }
+    public required List<DialogSliceEntity> DialogSlices { get; set; }
 
     public required DateTime LastAppendedUtc { get; set; }
 

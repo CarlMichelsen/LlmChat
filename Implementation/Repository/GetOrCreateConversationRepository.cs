@@ -30,13 +30,12 @@ public class GetOrCreateConversationRepository(
                 Id = new ConversationEntityId(Guid.NewGuid()),
                 Creator = profile,
                 SystemMessage = profile.DefaultSystemMessage,
-                Messages = [],
+                DialogSlices = [],
                 LastAppendedUtc = DateTime.UtcNow,
                 CreatedUtc = DateTime.UtcNow,
             };
 
-            var added = await applicationContext.Conversations.AddAsync(conv);
-            applicationContext.SaveChanges();
+            var added = applicationContext.Conversations.Add(conv);
             return added.Entity;
         }
         else

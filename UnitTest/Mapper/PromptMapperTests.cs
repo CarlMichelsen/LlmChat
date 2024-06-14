@@ -1,5 +1,5 @@
 ﻿using Domain.Entity;
-using Domain.Pipeline.SendMessage;
+using Domain.Entity.Id;
 using Implementation.Map;
 
 namespace UnitTest;
@@ -12,29 +12,45 @@ public class PromptMapperTests
     public void PromptShouldMapAlternatingUserAndAssistantMessages()
     {
         // Arrange
-        var validatedSendMessageData = new ValidatedSendMessageData
+        var pseudoNow = DateTime.UtcNow.Subtract(TimeSpan.FromMilliseconds(20));
+
+        var content = new ContentEntity
         {
-            RequestConversationId = this.sampleConversation.Id,
-            ResponseToMessageId = this.sampleConversation.Messages.Where(m => !m.IsUserMessage).Last().Id,
-            SelectedModel = ConversationMockDataGenerator.MockModel,
-            Content =
-            [
-                new ContentEntity
-                {
-                    Id = new Domain.Entity.Id.ContentEntityId(Guid.NewGuid()),
-                    ContentType = MessageContentType.Text,
-                    Content = "Hello, World!",
-                },
-            ],
+            Id = new ContentEntityId(Guid.NewGuid()),
+            ContentType = MessageContentType.Text,
+            Content = "Hello, World!",
         };
 
+        var newMessage = new MessageEntity
+        {
+            Id = new MessageEntityId(Guid.NewGuid()),
+            IsUserMessage = true,
+            Content = [content],
+            Prompt = default,
+            PreviousMessage = this.sampleConversation.DialogSlices.Last().Messages.Last(),
+            CompletedUtc = pseudoNow,
+        };
+
+        var dialogSliceEntity = new DialogSliceEntity
+        {
+            Id = new DialogSliceEntityId(Guid.NewGuid()),
+            Messages = [newMessage],
+            SelectedMessageGuid = default,
+            CreatedUtc = pseudoNow,
+        };
+
+        this.sampleConversation.DialogSlices.Add(dialogSliceEntity);
+
         // Act
-        var promptResult = PromptMapper.ToPrompt(this.sampleConversation, validatedSendMessageData);
+        var promptResult = PromptMapper.ToPrompt(
+            this.sampleConversation,
+            newMessage.Id,
+            ConversationMockDataGenerator.MockModel.Id);
 
         // Assert
         Assert.True(promptResult.IsSuccess);
         var prompt = promptResult.Unwrap();
         Assert.NotNull(prompt);
-        Assert.Equal(this.sampleConversation.Messages.Count + 1, prompt.Messages.Count);
+        Assert.Equal(this.sampleConversation.DialogSlices.Count, prompt.Messages.Count);
     }
 }

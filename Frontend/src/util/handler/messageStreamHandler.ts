@@ -55,7 +55,7 @@ export class MessageStreamHandler
             store.dispatch(selectConversation(this.conversationId));
 
 
-            if (!this.promptMessage.conversationId) {
+            if (!this.promptMessage.responseTo) {
                 const conversationOption: ConversationOption = {
                     id: this.conversationId,
                     summary: undefined,
@@ -84,7 +84,7 @@ export class MessageStreamHandler
             }
 
             store.dispatch(appendStream({ conversationId: this.conversationId!, content: contentDelta.content }));
-            scrollStickToBottom();
+            setTimeout(scrollStickToBottom, 0);
         }
 
         if (contentDelta.summary != null) {
@@ -135,7 +135,7 @@ export class MessageStreamHandler
             id: userMessageId,
             content: newMessage.content,
             completedUtc: (new Date()).toUTCString(),
-            previousMessageId: newMessage.responseToMessageId
+            previousMessageId: newMessage.responseTo!.responseToMessageId
         }
 
         return {

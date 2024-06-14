@@ -45,7 +45,10 @@ public class StreamResponseMessagePipelineStep(
             return await streamWriterService.WriteError("Expected ValidatedSendMessageData to have already been created");
         }
 
-        var promptResult = PromptMapper.ToPrompt(data.Conversation, data.ValidatedSendMessageData);
+        var promptResult = PromptMapper.ToPrompt(
+            data.Conversation,
+            data.UserMessage.Id,
+            data.ValidatedSendMessageData.SelectedModel.Id);
         if (promptResult.IsError)
         {
             return await streamWriterService.WriteError("Failed to map conversation to prompt", promptResult.Error!);
@@ -80,7 +83,7 @@ public class StreamResponseMessagePipelineStep(
             InputTokens = (int)conclusion.InputTokens,
             OutputTokens = (int)conclusion.OutputTokens,
             StopReason = conclusion.StreamUsage?.StopReason ?? "unknown",
-            MessageId = messageIdentifier.ToString(),
+            MessageId = messageIdentifier,
         };
         
         await streamWriterService.WriteConclusion(data.Conversation.Id, concluded);

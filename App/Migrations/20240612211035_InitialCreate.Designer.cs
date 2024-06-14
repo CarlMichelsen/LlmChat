@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace App.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20240610134015_InitialCreate")]
+    [Migration("20240612211035_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -76,6 +76,27 @@ namespace App.Migrations
                     b.ToTable("Conversations", "LlmChat");
                 });
 
+            modelBuilder.Entity("Domain.Entity.DialogSliceEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ConversationEntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SelectedMessageGuid")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationEntityId");
+
+                    b.ToTable("DialogSlices", "LlmChat");
+                });
+
             modelBuilder.Entity("Domain.Entity.MessageEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -84,7 +105,7 @@ namespace App.Migrations
                     b.Property<DateTime>("CompletedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("ConversationEntityId")
+                    b.Property<Guid?>("DialogSliceEntityId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsUserMessage")
@@ -98,7 +119,7 @@ namespace App.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConversationEntityId");
+                    b.HasIndex("DialogSliceEntityId");
 
                     b.HasIndex("PreviousMessageId");
 
@@ -183,11 +204,18 @@ namespace App.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("Domain.Entity.MessageEntity", b =>
+            modelBuilder.Entity("Domain.Entity.DialogSliceEntity", b =>
                 {
                     b.HasOne("Domain.Entity.ConversationEntity", null)
-                        .WithMany("Messages")
+                        .WithMany("DialogSlices")
                         .HasForeignKey("ConversationEntityId");
+                });
+
+            modelBuilder.Entity("Domain.Entity.MessageEntity", b =>
+                {
+                    b.HasOne("Domain.Entity.DialogSliceEntity", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("DialogSliceEntityId");
 
                     b.HasOne("Domain.Entity.MessageEntity", "PreviousMessage")
                         .WithMany()
@@ -203,6 +231,11 @@ namespace App.Migrations
                 });
 
             modelBuilder.Entity("Domain.Entity.ConversationEntity", b =>
+                {
+                    b.Navigation("DialogSlices");
+                });
+
+            modelBuilder.Entity("Domain.Entity.DialogSliceEntity", b =>
                 {
                     b.Navigation("Messages");
                 });

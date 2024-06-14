@@ -11,7 +11,7 @@ type DisplayMessageComponentProps = {
 }
 
 const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
-    {isUser, displayName, imageUrl, inputTokens, outputTokens, content }) => {
+    { isUser, displayName, imageUrl, inputTokens, outputTokens, content }) => {
     const renderContent = (content: Content, index: number) => {
         if (!content) {
             return null;
@@ -28,7 +28,7 @@ const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
 
         return (
             <div key={index}>
-                <p>{content.content}</p>
+                <pre className="font-sans w-full overflow-auto whitespace-break-spaces">{content.content}</pre>
             </div>
         );
     }
@@ -41,7 +41,6 @@ const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
                 <div className="ml-4">
                     {isUser ? (
                         <p>{displayName}</p>
-                        
                     ) : (
                         <>
                             <p>{displayName}</p>

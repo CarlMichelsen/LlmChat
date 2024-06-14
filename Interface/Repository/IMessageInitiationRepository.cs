@@ -8,9 +8,9 @@ namespace Interface.Repository;
 
 public interface IMessageInitiationRepository
 {
-    Result<MessageEntity> InitiateMessage(
+    Result<(MessageEntity Message, DialogSliceEntity DialogSlice)> InitiateMessage(
         ValidatedSendMessageData newUserMessageDto,
         ConversationEntity conversationEntity,
-        MessageEntityId? messageEntityId,
+        MessageEntityId? predeterminedMessageEntityId,
         StreamUsage? llmStreamTotalUsage);
 }

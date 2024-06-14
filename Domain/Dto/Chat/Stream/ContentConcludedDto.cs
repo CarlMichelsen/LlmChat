@@ -6,5 +6,5 @@ namespace Domain.Dto.Chat.Stream;
 public class ContentConcludedDto : PromptDto
 {
     [JsonPropertyName("messageId")]
-    public required string MessageId { get; init; }
+    public required Guid MessageId { get; init; }
 }

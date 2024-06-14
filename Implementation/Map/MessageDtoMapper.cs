@@ -10,11 +10,11 @@ public static class MessageDtoMapper
     {
         return new MessageDto
         {
-            Id = messageEntity.Id.ToString(),
+            Id = messageEntity.Id.Value,
             Prompt = messageEntity.Prompt is null ? null : Map(messageEntity.Prompt),
             Content = messageEntity.Content.Select(Map).ToList(),
             CompletedUtc = messageEntity.CompletedUtc,
-            PreviousMessageId = messageEntity.PreviousMessage?.Id.ToString(),
+            PreviousMessageId = messageEntity.PreviousMessage?.Id.Value,
         };
     }
 

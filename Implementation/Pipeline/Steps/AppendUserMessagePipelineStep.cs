@@ -27,20 +27,21 @@ public class AppendUserMessagePipelineStep(
             return await streamWriterService.WriteError("Expected conversation to have already been created");
         }
 
-        var messageResult = messageInitiationRepository.InitiateMessage(
+        var messageDialogResult = messageInitiationRepository.InitiateMessage(
             data.ValidatedSendMessageData,
             data.Conversation,
             default,
             default);
-        if (messageResult.IsError)
+        if (messageDialogResult.IsError)
         {
-            return await streamWriterService.WriteError("Failed to create or append user message", messageResult.Error!);
+            return await streamWriterService.WriteError("Failed to create or append user message", messageDialogResult.Error!);
         }
 
-        var message = messageResult.Unwrap();
+        var messageDialog = messageDialogResult.Unwrap();
         await conversationDtoCacheService.CacheConversation(data.Conversation);
-        await streamWriterService.WriteIds(data.Conversation.Id, message.Id);
-        data.UserMessage = message;
+        await streamWriterService.WriteIds(data.Conversation.Id, messageDialog.Message.Id);
+        data.UserMessage = messageDialog.Message;
+        data.UserMessageDialogSlice = messageDialog.DialogSlice;
         return data;
     }
 }

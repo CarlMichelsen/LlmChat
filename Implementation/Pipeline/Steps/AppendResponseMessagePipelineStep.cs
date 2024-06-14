@@ -39,10 +39,15 @@ public class AppendResponseMessagePipelineStep(
             return await streamWriterService.WriteError("Expected response-message to have already been created");
         }
 
+        // Make new ValidatedSendMessageData for the response message.
+        var responseTo = new ResponseToData
+        {
+            ConversationId = data.Conversation.Id,
+            MessageId = data.UserMessage.Id,
+        };
         var validatedResponseMessageData = new ValidatedSendMessageData
         {
-            RequestConversationId = data.Conversation.Id,
-            ResponseToMessageId = data.UserMessage.Id,
+            ResponseTo = responseTo,
             SelectedModel = data.ValidatedSendMessageData.SelectedModel,
             Content = data.ResponseMessageContent.Select(c => MessageDtoMapper.Map(c)).ToList(),
         };
@@ -56,7 +61,8 @@ public class AppendResponseMessagePipelineStep(
             return await streamWriterService.WriteError("Failed to initiate response message in exsisting conversation", responseInitiationResult.Error!);
         }
 
-        data.ResponseMessage = responseInitiationResult.Unwrap();
+        var messageDialog = responseInitiationResult.Unwrap();
+        data.ResponseMessage = messageDialog.Message;
         await conversationDtoCacheService.InvalidateConversationCache(data.Conversation.Id);
         return data;
     }

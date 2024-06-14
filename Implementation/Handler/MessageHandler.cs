@@ -22,7 +22,9 @@ public class MessageHandler(
         var result = await sendMessagePipeline.Execute(initial, cancellationToken);
         if (result.IsError)
         {
-            var contextData = $"conversationId: {initial.NewUserMessageDto.ConversationId} responseToId: {initial.NewUserMessageDto.ResponseToMessageId}";
+            var convId = initial.NewUserMessageDto.ResponseTo?.ConversationId ?? initial.Conversation?.Id.Value ?? Guid.Empty;
+            var rsptomsgId = initial.NewUserMessageDto.ResponseTo?.ResponseToMessageId ?? Guid.Empty;
+            var contextData = $"conversationId: {convId} responseToId: {rsptomsgId}";
 
             if (result.Error is OperationCanceledException)
             {

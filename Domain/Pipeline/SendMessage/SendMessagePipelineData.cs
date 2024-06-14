@@ -13,6 +13,8 @@ public class SendMessagePipelineData
 
     public ConversationEntity? Conversation { get; set; }
 
+    public DialogSliceEntity? UserMessageDialogSlice { get; set; }
+
     public MessageEntity? UserMessage { get; set; }
 
     public List<MessageContentDto>? ResponseMessageContent { get; set; }

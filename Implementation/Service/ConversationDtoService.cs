@@ -14,7 +14,8 @@ public class ConversationDtoService(
 {
     public async Task<Result<ConversationDto>> GetConversationDto(ConversationEntityId conversationId)
     {
-        var cached = await conversationDtoCacheService.GetConversationDto(conversationId);
+        var cached = await conversationDtoCacheService
+            .GetConversationDto(conversationId);
         if (cached is not null)
         {
             return cached;

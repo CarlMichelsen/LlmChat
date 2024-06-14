@@ -4,8 +4,7 @@ const htmlEscapes: { [key: string]: string } = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
+    '"': '\"',
 };
 
 const escapeHtml = (unsafe: string): string => {

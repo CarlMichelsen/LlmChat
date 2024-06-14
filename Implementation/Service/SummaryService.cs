@@ -1,8 +1,8 @@
 ﻿using Domain.Abstraction;
 using Domain.Configuration;
 using Domain.Entity;
+using Domain.Entity.Id;
 using Domain.Exception;
-using Implementation.Database;
 using Interface.Service;
 using LargeLanguageModelClient;
 using LargeLanguageModelClient.Dto.Prompt;
@@ -13,13 +13,12 @@ namespace Implementation.Service;
 
 public class SummaryService(
     IOptions<ConversationOptions> conversationOptions,
-    ILargeLanguageModelClient largeLanguageModelClient,
-    ApplicationContext applicationContext) : ISummaryService
+    ILargeLanguageModelClient largeLanguageModelClient) : ISummaryService
 {
-    public async Task<Result<string>> GenerateSummary(ConversationEntity conversationEntity)
+    public async Task<Result<string>> GenerateSummary(ConversationEntity conversationEntity, MessageEntityId fromMessageId)
     {
         var summaryModelIdentifier = conversationOptions.Value.SummaryModelIdentifier;
-        var prompt = this.GeneratePrompt(summaryModelIdentifier, conversationEntity);
+        var prompt = this.GeneratePrompt(summaryModelIdentifier, conversationEntity, fromMessageId);
 
         var response = await largeLanguageModelClient.Prompt(prompt, CancellationToken.None);
         if (!response.Ok)
@@ -36,22 +35,6 @@ public class SummaryService(
         return text;
     }
 
-    public async Task<Result<string>> GenerateAndApplySummary(ConversationEntity conversationEntity)
-    {
-        var summaryResult = await this.GenerateSummary(conversationEntity);
-        if (summaryResult.IsError)
-        {
-            return summaryResult.Error!;
-        }
-
-        var summary = summaryResult.Unwrap();
-        conversationEntity.Summary = summary;
-        conversationEntity.LastAppendedUtc = DateTime.UtcNow;
-        applicationContext.SaveChanges();
-
-        return summary;
-    }
-
     private static LlmContent Map(ContentEntity contentEntity)
     {
         return contentEntity.ContentType switch
@@ -62,19 +45,48 @@ public class SummaryService(
         };
     }
 
-    private LlmPromptDto GeneratePrompt(Guid modelIdentifier, ConversationEntity conversationEntity)
+    private LlmPromptDto GeneratePrompt(Guid modelIdentifier, ConversationEntity conversationEntity, MessageEntityId fromMessageId)
     {
-        var messages = conversationEntity.Messages.Select(m => new LlmPromptMessageDto(
-            IsUserMessage: m.Prompt is null,
-            Content: m.Content.Select(Map).ToList())).ToList();
+        var messages = conversationEntity.DialogSlices
+            .SelectMany(ds => ds.Messages)
+            .ToList();
+
+        var currentMessage = messages.FirstOrDefault(m => m.Id == fromMessageId);
+        if (currentMessage is null)
+        {
+            throw new InvalidOperationException("Unable to find branch-message to generate summary");
+        }
+
+        if (currentMessage.IsUserMessage)
+        {
+            throw new InvalidOperationException("Unable to generate summary from user branch-message");
+        }
+
+        var promptMessageEntities = new List<MessageEntity>();
+        do
+        {
+            promptMessageEntities.Insert(0, currentMessage);
+            if (currentMessage.PreviousMessage is null)
+            {
+                break;
+            }
+
+            currentMessage = messages.FirstOrDefault(m => m.Id == currentMessage.PreviousMessage.Id);
+        }
+        while (currentMessage is not null);
+        var promptMessages = promptMessageEntities
+            .Select(m => new LlmPromptMessageDto(
+                IsUserMessage: m.IsUserMessage,
+                Content: m.Content.Select(Map).ToList()))
+            .ToList();
         
         var summaryRequest = "Summarize the conversation so far, briefly. No more than 10 words. Shorter if possible.";
-        messages.Add(new LlmPromptMessageDto(IsUserMessage: true, Content: [new LlmTextContent { Text = summaryRequest }]));
+        promptMessages.Add(new LlmPromptMessageDto(IsUserMessage: true, Content: [new LlmTextContent { Text = summaryRequest }]));
 
         var system = "Keep track of the contents of this conversation. If the final message asks you to summarize the contents of the conversation. Do as you're asked and ignore the summarization request in your summary. The summary should make the conversation easily identifiable";
         return new LlmPromptDto(
             ModelIdentifier: modelIdentifier,
             SystemMessage: system,
-            Messages: messages);
+            Messages: promptMessages);
     }
 }

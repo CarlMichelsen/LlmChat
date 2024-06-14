@@ -21,6 +21,13 @@ const conversationSlice = createSlice({
         },
         appendMessage: (state, action: PayloadAction<AppendMessagePayload>) => appendMessageAction(state, action),
         selectMessage: (state, action: PayloadAction<SelectMessagePayload>) => selectMessageAction(state, action),
+        setSystemMessage: (state, action: PayloadAction<string>) => {
+            if (!state.conversation) {
+                return;
+            }
+
+            state.conversation.systemMessage = action.payload;
+        },
     },
 });
 
@@ -28,6 +35,7 @@ export const {
     setConversation,
     appendMessage,
     selectMessage,
+    setSystemMessage,
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;
