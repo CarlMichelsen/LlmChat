@@ -54,7 +54,7 @@ public class MessageInitiationRepositoryTests : TestDatabase
         await this.Context.SaveChangesAsync();
 
         // Assert
-        Assert.IsType<MessageEntity>(result.Unwrap());
+        Assert.IsType<(MessageEntity, DialogSliceEntity)>(result.Unwrap());
         Assert.True(result.IsSuccess);
         Assert.IsNotType<Exception>(result.Error);
         Assert.Null(result.Error);
