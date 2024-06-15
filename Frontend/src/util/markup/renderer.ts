@@ -14,7 +14,7 @@ const escapeHtml = (unsafe: string): string => {
 const renderer = new marked.Renderer();
 renderer.code = (code: string, infostring: string | undefined, _: boolean): string => {
     const languageClass = infostring ? `language-${infostring}` : '';
-    return `<pre class="my-1 overflow-auto bg-black text-white rounded-sm pb-4 p-0.5"><code class="${languageClass}">${code}</code></pre>`;
+    return `<pre class="my-1 overflow-auto bg-black text-white rounded-sm pb-4 p-0.5 w-[490px] lg:container"><code class="${languageClass}">${code}</code></pre>`;
 }
 
 marked.use({ renderer: renderer });

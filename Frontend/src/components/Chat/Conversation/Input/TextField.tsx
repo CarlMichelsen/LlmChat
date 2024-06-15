@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Message } from "../../../../util/type/llmChat/conversation/message";
 import Dialog from "../../../Dialog";
-import ConversationSystemMessageDialog from "./ConversationSystemMessageDialog";
+import SystemMessageDialog from "./SystemMessageDialog";
 
 type TextFieldProps = {
     ready: boolean;
@@ -34,7 +34,7 @@ const TextField: React.FC<TextFieldProps> = ({ ready, streaming, sendMessage, te
             <textarea
                 placeholder={placeholder}
                 className={
-                    `block w-full h-32 mx-auto resize-none ${streaming && "bg-black text-white"} ${!ready && "border-none"} border border-black rounded-md disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none`}
+                    `block w-full h-32 mx-auto resize-none ${streaming ? "bg-white text-black dark:bg-zinc-300 dark:text-black" : "dark:bg-black dark:text-white bg-zinc-300 text-black"} ${!ready && "dark:border-white border-black"} border border-black rounded-md disabled:bg-zinc-600 p-1 md:p-2 focus:outline-none`}
                 onKeyDown={handleSendOnEnter}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -43,9 +43,9 @@ const TextField: React.FC<TextFieldProps> = ({ ready, streaming, sendMessage, te
 
             {editingMessage
                 ? (<button className="text-xs h-full w-full border border-black rounded-md bg-red-600 hover:bg-black text-white" onMouseDown={() => cancelEdit()}>Stop Editing</button>)
-                : (<button className="text-xs h-full w-full border border-black rounded-md hover:bg-black hover:text-white" onMouseDown={() => setSystemMessageDialog(true)}>Edit System Message</button>)}
+                : (<button className="text-xs h-full w-full border border-black rounded-md hover:bg-black dark:bg-black bg-white hover:text-white" onMouseDown={() => setSystemMessageDialog(true)}>Edit System Message</button>)}
 
-            {systemMessageDialog && <Dialog isOpen={systemMessageDialog} onClose={() => setSystemMessageDialog(false)} children={<ConversationSystemMessageDialog />} />}
+            {systemMessageDialog && <Dialog isOpen={systemMessageDialog} onClose={() => setSystemMessageDialog(false)} children={<SystemMessageDialog closeDialog={() => setSystemMessageDialog(false)} />} />}
         </div>
     );
 }

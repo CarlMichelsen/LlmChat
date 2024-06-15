@@ -51,11 +51,11 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
             ?? undefined
         
         // if editing initial message
-        if (getEditingMessage()) {
+        if (!!getEditingMessage()) {
             responseToMessageId = undefined;
         }
 
-        if (selectedConversationId && getEditingMessage()) {
+        if (selectedConversationId) {
             responseTo = {
                 conversationId: selectedConversationId,
                 responseToMessageId: responseToMessageId,
