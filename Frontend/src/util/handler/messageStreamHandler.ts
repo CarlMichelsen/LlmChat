@@ -72,6 +72,7 @@ export class MessageStreamHandler
             const payload = this.createAppendMessageModelFromUserMessage(this.userMessageId, this.promptMessage);
             store.dispatch(appendMessage(payload));
             store.dispatch(selectMessage({ conversationId: this.conversationId!, messageId: this.userMessageId }));
+            setTimeout(() => scrollStickToBottom(true), 0);
         }
 
         if (contentDelta.content != null) {

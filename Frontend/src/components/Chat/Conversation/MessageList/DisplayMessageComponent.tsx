@@ -8,10 +8,11 @@ type DisplayMessageComponentProps = {
     inputTokens: number;
     outputTokens: number;
     content: Content[]
+    userMessageSubheader?: React.ReactNode;
 }
 
 const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
-    { isUser, displayName, imageUrl, inputTokens, outputTokens, content }) => {
+    { isUser, displayName, imageUrl, inputTokens, outputTokens, content, userMessageSubheader }) => {
     const renderContent = (content: Content, index: number) => {
         if (!content) {
             return null;
@@ -40,7 +41,10 @@ const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
                 <img className="rounded-lg bg-blue-300 h-[50px] w-[50px]" src={imageUrl} alt="profile" />
                 <div className="ml-4">
                     {isUser ? (
-                        <p>{displayName}</p>
+                        <>
+                            <p>{displayName}</p>
+                            {userMessageSubheader}
+                        </>
                     ) : (
                         <>
                             <p>{displayName}</p>

@@ -20,7 +20,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children }) => {
         >
             <dialog
                 onClick={handleDialogClick}
-                className="bg-white p-4 rounded-md w-full h-[750px] md:w-[750px]"
+                className="text-black bg-white dark:text-white dark:bg-zinc-600 p-4 rounded-md w-full h-[750px] md:w-[750px]"
                 open
             >
                 {children}

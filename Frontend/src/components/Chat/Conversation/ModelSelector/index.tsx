@@ -38,7 +38,7 @@ const ModelSelector: React.FC = () => {
     }, [modelState.models, modelState.selectedModelId]);
 
     return (
-        <div className="bg-white rounded-bl-md w-40">
+        <div className="bg-white dark:bg-black rounded-bl-md w-40">
             {model ? (
                 <div className="grid grid-cols-[25px_1fr] w-full">
                     <button
