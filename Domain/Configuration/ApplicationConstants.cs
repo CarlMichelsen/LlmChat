@@ -10,5 +10,8 @@ public static class ApplicationConstants
 
     public const string DevelopmentCorsPolicyName = "DevelopmentCors";
 
-    public static JsonSerializerOptions DefaultJsonOptions => new(JsonSerializerOptions.Default) { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    public static JsonSerializerOptions DefaultJsonOptions => new(JsonSerializerOptions.Default)
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
 }

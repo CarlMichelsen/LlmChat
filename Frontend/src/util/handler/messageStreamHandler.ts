@@ -135,7 +135,7 @@ export class MessageStreamHandler
             id: userMessageId,
             content: newMessage.content,
             completedUtc: (new Date()).toUTCString(),
-            previousMessageId: newMessage.responseTo!.responseToMessageId
+            previousMessageId: newMessage.responseTo?.responseToMessageId ?? null,
         }
 
         return {

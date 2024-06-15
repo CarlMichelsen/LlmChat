@@ -21,7 +21,7 @@ const createOrUpdateSlice = (conversation: Conversation, message: Message, prevM
     const indexOfPrevSlice = conversation.dialogSlices
         .findIndex(slice => slice.messages.find(m => m.id == prevMessageId));
     
-    if (indexOfPrevSlice == -1) {
+    if (indexOfPrevSlice == -1 && conversation.dialogSlices.length === 0) {
         const newSlice = createSliceFromMessage(message);
         return newSlice;
     }

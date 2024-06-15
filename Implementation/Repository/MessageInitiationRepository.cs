@@ -17,7 +17,7 @@ public class MessageInitiationRepository : IMessageInitiationRepository
         StreamUsage? llmStreamTotalUsage)
     {
         (DialogSliceEntity DialogSlice, MessageEntity Message)? responseToDialogSliceAndMessage = default;
-        if (validatedSendMessageData.ResponseTo is not null)
+        if (validatedSendMessageData.ResponseTo is not null && validatedSendMessageData.ResponseTo.MessageId is not null)
         {
             var dialogSlice = conversationEntity.DialogSlices
                 .FirstOrDefault(dse => dse.Messages.Exists(m => m.Id == validatedSendMessageData.ResponseTo.MessageId));

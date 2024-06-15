@@ -9,10 +9,9 @@ import DisplayMessageComponent from "./DisplayMessageComponent";
 type MessageComponentProps = {
     conversationId: string;
     dialogSlice: DialogSlice;
-    index: number;
 }
 
-const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conversationId, index }) => {
+const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conversationId }) => {
     const modelState = useSelector((state: RootApplicationState) => state.models);
     const userState = useSelector((state: RootApplicationState) => state.user);
     const msg = dialogSlice.messages[dialogSlice.selectedIndex];
@@ -66,7 +65,6 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conver
                     onMouseDown={() => incrementSelectedMessageSliceId(1)}>&gt;</button>
                 <div>
                     <button
-                        disabled={index === 0}
                         className="ml-4 hover:underline disabled:text-zinc-400 disabled:hover:no-underline"
                         onMouseDown={() => store.dispatch(editMessage({ conversationId, editing: msg }))}>edit</button>
                 </div>
