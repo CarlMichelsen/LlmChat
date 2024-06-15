@@ -27,14 +27,17 @@ public static class ConversationDtoMapper
         for (int i = 0; i < dialogSliceEntities.Count; i++)
         {
             var dse = dialogSliceEntities.ElementAt(i);
-            var prevDse = dialogSliceEntities.ElementAtOrDefault(i - 1);
-            if (prevDse is not null && visible)
+            if (visible)
             {
-                var currentSelectedMessage = dse.Messages.First(m => m.Id.Value == dse.SelectedMessageGuid);
-                if (currentSelectedMessage.PreviousMessage is not null)
+                var prevDse = dialogSliceEntities.ElementAtOrDefault(i - 1);
+                if (prevDse is not null)
                 {
-                    var prevSelectedMessage = prevDse.Messages.First(m => m.Id.Value == prevDse.SelectedMessageGuid);
-                    visible = currentSelectedMessage.PreviousMessage.Id == prevSelectedMessage.Id;
+                    var currentSelectedMessage = dse.Messages.First(m => m.Id.Value == dse.SelectedMessageGuid);
+                    if (currentSelectedMessage.PreviousMessage is not null)
+                    {
+                        var prevSelectedMessage = prevDse.Messages.First(m => m.Id.Value == prevDse.SelectedMessageGuid);
+                        visible = currentSelectedMessage.PreviousMessage.Id == prevSelectedMessage.Id;
+                    }
                 }
             }
 
@@ -47,14 +50,16 @@ public static class ConversationDtoMapper
     private static DialogSliceDto Map(DialogSliceEntity dialogSliceEntity, bool visible)
     {
         var msgId = dialogSliceEntity.SelectedMessageGuid == Guid.Empty
-            ? new MessageEntityId(dialogSliceEntity.SelectedMessageGuid)
-            : default;
+            ? default
+            : new MessageEntityId(dialogSliceEntity.SelectedMessageGuid);
         
         var selectedIndex = msgId is not null
             ? dialogSliceEntity.Messages.FindIndex(m => m.Id == msgId)
             : -1;
 
-        var messageDtos = dialogSliceEntity.Messages.OrderBy(m => m.CompletedUtc).Select(MessageDtoMapper.Map).ToList();
+        var messageDtos = dialogSliceEntity.Messages
+            .Select(MessageDtoMapper.Map)
+            .ToList();
 
         return new DialogSliceDto
         {

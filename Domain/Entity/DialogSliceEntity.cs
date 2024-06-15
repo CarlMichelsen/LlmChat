@@ -8,7 +8,7 @@ public class DialogSliceEntity
 
     public required List<MessageEntity> Messages { get; init; }
 
-    public required Guid SelectedMessageGuid { get; set; } = Guid.Empty;
+    public required Guid SelectedMessageGuid { get; set; }
 
     public required DateTime CreatedUtc { get; init; }
 }

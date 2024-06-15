@@ -36,6 +36,11 @@ public class ConversationReadRepository(
 
             conversation.DialogSlices = conversation.DialogSlices
                 .OrderBy(ds => ds.CreatedUtc)
+                .Select(ds =>
+                {
+                    ds.Messages.Sort((m1, m2) => m1.CompletedUtc.CompareTo(m2.CompletedUtc));
+                    return ds;
+                })
                 .ToList();
             return conversation;
         }

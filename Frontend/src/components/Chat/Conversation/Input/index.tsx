@@ -46,18 +46,16 @@ const Input: React.FC<InputProps> = ({ selectedConversationId }) => {
 
     const sendActualMessage = async () => {
         let responseTo: ResponseTo|undefined;
-        const responseToMessageId = getEditingMessage()?.previousMessageId
+        let responseToMessageId = getEditingMessage()?.previousMessageId
             ?? getLatestMessageId(conversationState.conversation)
-            ?? null
+            ?? undefined
+        
+        // if editing initial message
+        if (getEditingMessage()) {
+            responseToMessageId = undefined;
+        }
 
-        if (responseToMessageId && selectedConversationId) {
-            const responseToDialogSlice = conversationState.conversation?.dialogSlices
-                .find(d => d.messages.find(m => m.id === responseToMessageId));
-            
-            if (!responseToDialogSlice) {
-                throw new Error("Unable to find dialog slice of message being responded to");
-            }
-
+        if (selectedConversationId && getEditingMessage()) {
             responseTo = {
                 conversationId: selectedConversationId,
                 responseToMessageId: responseToMessageId,

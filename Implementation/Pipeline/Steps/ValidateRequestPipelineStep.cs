@@ -23,7 +23,9 @@ public class ValidateRequestPipelineStep(
             responseToData = new ResponseToData
             {
                 ConversationId = new ConversationEntityId(data.NewUserMessageDto.ResponseTo.ConversationId),
-                MessageId = new MessageEntityId(data.NewUserMessageDto.ResponseTo.ResponseToMessageId),
+                MessageId = data.NewUserMessageDto.ResponseTo.ResponseToMessageId is null
+                    ? default
+                    : new MessageEntityId((Guid)data.NewUserMessageDto.ResponseTo.ResponseToMessageId),
             };
         }
 

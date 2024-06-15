@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
     push:
-        branches: main
+        branches: github.event.repository.default_branch
 
 jobs:
     docker-build-publish:

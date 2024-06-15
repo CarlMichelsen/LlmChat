@@ -8,5 +8,5 @@ public class ResponseToDto
     public required Guid ConversationId { get; init; }
 
     [JsonPropertyName("responseToMessageId")]
-    public required Guid ResponseToMessageId { get; init; }
+    public Guid? ResponseToMessageId { get; init; }
 }

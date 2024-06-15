@@ -17,7 +17,7 @@ public class MessageInitiationRepository : IMessageInitiationRepository
         StreamUsage? llmStreamTotalUsage)
     {
         (DialogSliceEntity DialogSlice, MessageEntity Message)? responseToDialogSliceAndMessage = default;
-        if (validatedSendMessageData.ResponseTo is not null)
+        if (validatedSendMessageData.ResponseTo is not null && validatedSendMessageData.ResponseTo.MessageId is not null)
         {
             var dialogSlice = conversationEntity.DialogSlices
                 .FirstOrDefault(dse => dse.Messages.Exists(m => m.Id == validatedSendMessageData.ResponseTo.MessageId));
@@ -82,17 +82,44 @@ public class MessageInitiationRepository : IMessageInitiationRepository
         }
 
         var currentDialogSlice = conversationEntity.DialogSlices.ElementAtOrDefault(dialogSliceEntityIndex) ?? new DialogSliceEntity
-            {
-                Id = new DialogSliceEntityId(Guid.NewGuid()),
-                Messages = [],
-                SelectedMessageGuid = default,
-                CreatedUtc = DateTime.UtcNow,
-            };
+        {
+            Id = new DialogSliceEntityId(Guid.NewGuid()),
+            Messages = [],
+            SelectedMessageGuid = newMessage.Id.Value,
+            CreatedUtc = DateTime.UtcNow,
+        };
+
         currentDialogSlice.Messages.Add(newMessage);
         currentDialogSlice.SelectedMessageGuid = newMessage.Id.Value;
         conversationEntity.DialogSlices.Add(currentDialogSlice);
+        this.SetSelectedMessageHappyPath(conversationEntity, newMessage.Id);
 
         conversationEntity.LastAppendedUtc = DateTime.UtcNow;
         return (newMessage, currentDialogSlice);
+    }
+
+    private void SetSelectedMessageHappyPath(ConversationEntity conversationEntity, MessageEntityId messageEntityId)
+    {
+        var happyPath = new List<MessageEntityId>();
+        var allMessages = conversationEntity.DialogSlices.SelectMany(d => d.Messages).ToList();
+        var currentMessage = allMessages.First(m => m.Id == messageEntityId);
+        do
+        {
+            happyPath.Insert(0, currentMessage.Id);
+            if (currentMessage.PreviousMessage is null)
+            {
+                break;
+            }
+
+            currentMessage = allMessages.FirstOrDefault(m => m.Id == currentMessage.PreviousMessage.Id);
+        }
+        while(currentMessage is not null);
+
+        foreach (var msgId in happyPath)
+        {
+            conversationEntity.DialogSlices
+                .First(d => d.Messages.Exists(m => m.Id == msgId))
+                .SelectedMessageGuid = msgId.Value;
+        }
     }
 }
