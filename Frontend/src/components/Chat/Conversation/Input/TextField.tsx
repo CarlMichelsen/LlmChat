@@ -42,8 +42,8 @@ const TextField: React.FC<TextFieldProps> = ({ ready, streaming, sendMessage, te
                 id="chatbox"></textarea>
 
             {editingMessage
-                ? (<button className="text-xs h-full w-full border border-black rounded-md bg-red-600 hover:bg-black text-white" onMouseDown={() => cancelEdit()}>Stop Editing</button>)
-                : (<button className="text-xs h-full w-full border border-black rounded-md hover:bg-black dark:bg-black bg-white hover:text-white" onMouseDown={() => setSystemMessageDialog(true)}>Edit System Message</button>)}
+                ? <button className="text-xs h-full w-full border border-black rounded-md bg-red-600 hover:bg-black text-white" onMouseDown={() => cancelEdit()}>Stop Editing</button>
+                : <button className="text-xs h-full w-full border border-black rounded-md hover:bg-black dark:bg-black bg-white hover:text-white" onMouseDown={() => setSystemMessageDialog(true)}>Edit System Message</button>}
 
             {systemMessageDialog && <Dialog isOpen={systemMessageDialog} onClose={() => setSystemMessageDialog(false)} children={<SystemMessageDialog closeDialog={() => setSystemMessageDialog(false)} />} />}
         </div>

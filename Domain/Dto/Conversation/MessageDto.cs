@@ -6,6 +6,9 @@ public class MessageDto
 {
     [JsonPropertyName("id")]
     public required Guid Id { get; init; }
+
+    [JsonPropertyName("isUserMessage")]
+    public required bool IsUserMessage { get; init; }
     
     [JsonPropertyName("prompt")]
     public required PromptDto? Prompt { get; init; }

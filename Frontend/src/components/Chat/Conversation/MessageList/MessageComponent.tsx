@@ -46,33 +46,38 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ dialogSlice, conver
     return (
         <li>
             <DisplayMessageComponent
+                id={msg.id}
                 isUser={!msg.prompt}
                 displayName={getModelDisplayName(msg.prompt?.modelId) ?? msg.prompt?.modelName ?? userState.user!.name}
                 imageUrl={imgUrl}
                 inputTokens={msg.prompt?.inputTokens ?? 0}
                 outputTokens={msg.prompt?.outputTokens ?? 0}
                 content={msg.content}
-                userMessageSubheader={!msg.prompt && (
-                    <div className={`grid md:grid-cols-[100px_1fr_15px_30px_15px_150px] grid-cols-[100px_1fr_15px_30px_15px] h-6`}>
+                userMessageSubheader={!msg.prompt ? (
+                    <div className={`grid md:grid-cols-[100px_250px_60px_1fr] grid-cols-[100px_170px_60px_1fr] h-6`}>
                         <button
                             className="hover:underline bg-zinc-400 dark:bg-zinc-700 hover:bg-zinc-700 dark:hover:bg-zinc-200 hover:text-white dark:hover:text-black rounded-md text-xs"
                             onMouseDown={() => store.dispatch(editMessage({ conversationId, editing: msg }))}>Edit message</button>
+
+                        {import.meta.env.MODE == "development" ? <p className="text-xs ml-2 mt-1">{msg.id}</p> : <label className="sr-only" htmlFor={msg.id}>User Message</label>}
+                        
                         {dialogSlice.messages.length > 1 && (
-                            <>
-                            <div></div>
-                            <button
-                            disabled={dialogSlice.selectedIndex <= 0}
-                            className="hover:underline disabled:text-zinc-400 disabled:hover:no-underline"
-                            onMouseDown={() => incrementSelectedMessageSliceId(-1)}>&lt;</button>
-                            <p className="text-center">{dialogSlice.selectedIndex + 1}/{dialogSlice.messages.length}</p>
-                            <button
-                                disabled={dialogSlice.selectedIndex >= dialogSlice.messages.length - 1}
-                                className="hover:underline disabled:text-zinc-400 disabled:hover:no-underline"
-                                onMouseDown={() => incrementSelectedMessageSliceId(1)}>&gt;</button>
-                            </>
+                            <div className="grid grid-cols-[15px_30px_15px]">
+                                <button
+                                    disabled={dialogSlice.selectedIndex <= 0}
+                                    className="hover:underline disabled:text-zinc-400 disabled:hover:no-underline"
+                                    onMouseDown={() => incrementSelectedMessageSliceId(-1)}>&lt;</button>
+
+                                <p className="text-center my-auto">{dialogSlice.selectedIndex + 1}/{dialogSlice.messages.length}</p>
+
+                                <button
+                                    disabled={dialogSlice.selectedIndex >= dialogSlice.messages.length - 1}
+                                    className="hover:underline disabled:text-zinc-400 disabled:hover:no-underline"
+                                    onMouseDown={() => incrementSelectedMessageSliceId(1)}>&gt;</button>
+                            </div>
                         )}
                     </div>
-                )} />
+                ) : (import.meta.env.MODE == "development" ? <p className="text-xs ml-2">{msg.id}</p> : <label className="sr-only" htmlFor={msg.id}>Assistant Message</label>)} />
         </li>
     );
 }

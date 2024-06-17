@@ -109,6 +109,7 @@ export class MessageStreamHandler
 
         const msg: Message = {
             id: concluded.messageId,
+            isUserMessage: false,
             prompt: concluded,
             content: sortedList.map(kv => kv[1]),
             completedUtc: (new Date()).toUTCString(),
@@ -134,6 +135,7 @@ export class MessageStreamHandler
 
         const msg: Message = {
             id: userMessageId,
+            isUserMessage: true,
             content: newMessage.content,
             completedUtc: (new Date()).toUTCString(),
             previousMessageId: newMessage.responseTo?.responseToMessageId ?? null,

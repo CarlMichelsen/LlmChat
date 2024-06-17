@@ -11,6 +11,7 @@ public static class MessageDtoMapper
         return new MessageDto
         {
             Id = messageEntity.Id.Value,
+            IsUserMessage = messageEntity.IsUserMessage,
             Prompt = messageEntity.Prompt is null ? null : Map(messageEntity.Prompt),
             Content = messageEntity.Content.Select(Map).ToList(),
             CompletedUtc = messageEntity.CompletedUtc,

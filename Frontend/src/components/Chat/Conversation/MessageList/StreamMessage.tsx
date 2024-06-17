@@ -15,6 +15,7 @@ const StreamMessage: React.FC<{conversationId: string}> = ({ conversationId }) =
     return stream?.streaming ? (
         <li key="streaming">
             <DisplayMessageComponent
+                id="streaming"
                 isUser={false}
                 displayName="Streaming"
                 imageUrl={robotIcon}
