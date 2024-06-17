@@ -2,6 +2,7 @@ import { render } from "../../../../util/markup/renderer";
 import { Content } from "../../../../util/type/llmChat/conversation/content";
 
 type DisplayMessageComponentProps = {
+    id: string;
     isUser: boolean;
     displayName: string;
     imageUrl: string;
@@ -12,7 +13,7 @@ type DisplayMessageComponentProps = {
 }
 
 const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
-    { isUser, displayName, imageUrl, inputTokens, outputTokens, content, userMessageSubheader }) => {
+    { id, isUser, displayName, imageUrl, inputTokens, outputTokens, content, userMessageSubheader }) => {
     const renderContent = (content: Content, index: number) => {
         if (!content) {
             return null;
@@ -48,13 +49,17 @@ const DisplayMessageComponent: React.FC<DisplayMessageComponentProps> = (
                     ) : (
                         <>
                             <p>{displayName}</p>
-                            <p className="text-xs text-gray-500">{inputTokens} → {outputTokens}</p>
+                            <div className="grid grid-cols-[70px_1fr]">
+                                <p className="text-xs text-gray-500">{inputTokens} → {outputTokens}</p>
+                                {userMessageSubheader}
+                            </div>
+                            
                         </>
                     )}
                 </div>
             </div>
 
-            <div className="md:ml-5 mt-2">
+            <div id={id} className="md:ml-5 mt-2">
                 {content.map(renderContent)}
             </div>
         </>
