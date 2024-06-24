@@ -2,10 +2,4 @@
 
 namespace Domain.Entity.Id;
 
-public class PromptEntityId : TypedGuid<PromptEntityId>
-{
-    public PromptEntityId(Guid value)
-        : base(value)
-    {
-    }
-}
+public class PromptEntityId(Guid value) : TypedGuid<PromptEntityId>(value);

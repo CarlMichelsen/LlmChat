@@ -2,10 +2,4 @@
 
 namespace Domain.Entity.Id;
 
-public class MessageEntityId : TypedGuid<MessageEntityId>
-{
-    public MessageEntityId(Guid value)
-        : base(value)
-    {
-    }
-}
+public class MessageEntityId(Guid value) : TypedGuid<MessageEntityId>(value);

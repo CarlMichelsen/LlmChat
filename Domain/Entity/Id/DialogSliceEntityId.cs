@@ -2,10 +2,4 @@
 
 namespace Domain.Entity.Id;
 
-public class DialogSliceEntityId : TypedGuid<DialogSliceEntityId>
-{
-    public DialogSliceEntityId(Guid value)
-        : base(value)
-    {
-    }
-}
+public class DialogSliceEntityId(Guid value) : TypedGuid<DialogSliceEntityId>(value);

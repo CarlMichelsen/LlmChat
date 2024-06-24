@@ -21,6 +21,13 @@ public class ConversationController(
         return this.Ok(serviceResponse);
     }
 
+    [HttpDelete("{conversationId}")]
+    public async Task<ActionResult<ServiceResponse<bool>>> DeleteConversation([FromRoute] Guid conversationId)
+    {
+        var serviceResponse = await conversationHandler.DeleteConversation(new ConversationEntityId(conversationId));
+        return this.Ok(serviceResponse);
+    }
+
     [HttpPost("{conversationId}/system")]
     public async Task<ActionResult<ServiceResponse<List<ConversationOptionDto>>>> SetSystemMessage([FromRoute] Guid conversationId, [FromBody] string systemMessage)
     {

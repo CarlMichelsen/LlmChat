@@ -3,11 +3,13 @@ import { getQueryParam } from '../../util/helpers/queryParameter';
 import { ConversationOption, OptionDateCollection } from '../../util/type/optionDateCollection';
 import { createOptionDateCollection } from './createOptionDateCollection';
 import { addConversationOptionToList } from './addConversationOptionToList';
+import { deleteConversationFromList } from './deleteConversationFromList';
 
 type ConversationListState = {
     selectedConversationId?: string;
     mobileIsOpen: boolean;
     desktopIsOpen: boolean;
+    contextMenuOption?: string;
     list?: OptionDateCollection[];
 }
 
@@ -21,6 +23,9 @@ const conversationListSlice = createSlice({
     name: 'conversationList',
     initialState,
     reducers: {
+        setContextMenu: (state, action: PayloadAction<string|undefined>) => {
+            state.contextMenuOption = action.payload;
+        },
         openMobileConversationList: (state, action: PayloadAction<boolean>) => {
             state.mobileIsOpen = action.payload
         },
@@ -33,6 +38,11 @@ const conversationListSlice = createSlice({
         addConversationOption: (state, action: PayloadAction<ConversationOption>) => {
             if (state.list) {
                 addConversationOptionToList(action.payload, state.list);
+            }
+        },
+        deleteConversationOption: (state, action: PayloadAction<string>) => {
+            if (state.list) {
+                deleteConversationFromList(action.payload, state.list);
             }
         },
         promoteConversation: (state, action: PayloadAction<string>) => {
@@ -55,10 +65,12 @@ const conversationListSlice = createSlice({
 });
 
 export const {
+    setContextMenu,
     openMobileConversationList,
     openDesktopConversationList,
     setConversationOptions,
     addConversationOption,
+    deleteConversationOption,
     promoteConversation,
     addConversationOptionSummary,
     selectConversation

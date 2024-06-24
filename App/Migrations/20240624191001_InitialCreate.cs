@@ -60,6 +60,7 @@ namespace App.Migrations
                     CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
                     LastAppendedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -161,6 +162,13 @@ namespace App.Migrations
                 schema: "LlmChat",
                 table: "Conversations",
                 column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Conversations_DeletedAtUtc",
+                schema: "LlmChat",
+                table: "Conversations",
+                column: "DeletedAtUtc",
+                filter: "\"Conversations\".\"DeletedAtUtc\" IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DialogSlices_ConversationEntityId",

@@ -56,6 +56,9 @@ namespace App.Migrations
                     b.Property<Guid>("CreatorId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("LastAppendedUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -69,6 +72,9 @@ namespace App.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
+
+                    b.HasIndex("DeletedAtUtc")
+                        .HasFilter("\"Conversations\".\"DeletedAtUtc\" IS NULL");
 
                     b.ToTable("Conversations", "LlmChat");
                 });

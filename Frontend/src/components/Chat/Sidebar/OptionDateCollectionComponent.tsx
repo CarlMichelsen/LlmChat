@@ -5,6 +5,7 @@ type OptionDateCollectionComponentProps = {
     selectedConversationId?: string;
     selectConversation: (conversationId: string) => void;
     collection: OptionDateCollection;
+    contextMenu?: string;
 }
 
 const OptionDateCollectionComponent: React.FC<OptionDateCollectionComponentProps> = ({ collection, selectedConversationId, selectConversation }) => {
@@ -12,7 +13,12 @@ const OptionDateCollectionComponent: React.FC<OptionDateCollectionComponentProps
         <li>
             <label className="text-xs font-bold underline" htmlFor={collection.htmlId}>{collection.dateString}</label>
             <ol className="pl-1 max-h-72 overflow-y-scroll space-y-1" id={collection.htmlId}>
-                {collection.options.map(s => (<ConversationOptionComponent key={s.id} option={s} selected={selectedConversationId == s.id} selectConversation={selectConversation} />))}
+                {collection.options.map(s => (
+                    <ConversationOptionComponent
+                        key={s.id}
+                        option={s}
+                        selected={selectedConversationId == s.id}
+                        selectConversation={selectConversation}/>))}
             </ol>
         </li>
     ) : null;

@@ -1,5 +1,4 @@
-﻿using Domain.Abstraction;
-using Domain.Entity;
+﻿using Domain.Entity;
 using Domain.Entity.Id;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +31,21 @@ public sealed class ApplicationContext : DbContext
 
     public DbSet<PromptEntity> Prompts { get; init; }
 
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var softDeleteEntries = this.ChangeTracker
+            .Entries<ISoftDeletable>()
+            .Where(e => e.State == EntityState.Deleted);
+        
+        foreach (var entityEntry in softDeleteEntries)
+        {
+            entityEntry.State = EntityState.Modified;
+            entityEntry.Property(nameof(ISoftDeletable.DeletedAtUtc)).CurrentValue = DateTime.UtcNow;
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("LlmChat");
@@ -40,6 +54,9 @@ public sealed class ApplicationContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new ConversationEntityId(guid));
+
+            entity.HasQueryFilter(e => e.DeletedAtUtc == null);
+            entity.HasIndex(p => p.DeletedAtUtc).HasFilter("\"Conversations\".\"DeletedAtUtc\" IS NULL");
         });
 
         modelBuilder.Entity<ProfileEntity>(entity =>

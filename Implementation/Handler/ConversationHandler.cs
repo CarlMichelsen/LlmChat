@@ -11,6 +11,7 @@ namespace Implementation.Handler;
 public class ConversationHandler(
     IConversationDtoService conversationDtoService,
     IConversationOptionService conversationOptionService,
+    IConversationDeletionRepository conversationDeletionRepository,
     IConversationSystemMessageRepository conversationSystemMessageRepository) : IConversationHandler
 {
     public async Task<ServiceResponse<ConversationDto>> GetConversation(ConversationEntityId conversationId)
@@ -20,13 +21,24 @@ public class ConversationHandler(
         if (conversationDtoResult.IsError)
         {
             var err = MapError("Failed to get conversationDto", conversationDtoResult.Error!);
-            var errRes = new ServiceResponse<ConversationDto>(err);
-            return errRes;
+            return new ServiceResponse<ConversationDto>(err);
         }
         
-        var conv = conversationDtoResult.Unwrap();
-        var res = new ServiceResponse<ConversationDto>(conv);
-        return res;
+        return new ServiceResponse<ConversationDto>(conversationDtoResult.Unwrap());
+    }
+
+    public async Task<ServiceResponse<bool>> DeleteConversation(ConversationEntityId conversationId)
+    {
+        var deleteResult = await conversationDeletionRepository
+            .DeleteConversation(conversationId);
+        
+        if (deleteResult.IsError)
+        {
+            var err = MapError("Failed to delete conversation", deleteResult.Error!);
+            return new ServiceResponse<bool>(err);
+        }
+
+        return new ServiceResponse<bool>(deleteResult.Unwrap());
     }
 
     public async Task<ServiceResponse<List<ConversationOptionDto>>> GetConversationList()

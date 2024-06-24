@@ -2,10 +2,4 @@
 
 namespace Domain.Entity.Id;
 
-public class ContentEntityId : TypedGuid<ContentEntityId>
-{
-    public ContentEntityId(Guid value)
-        : base(value)
-    {
-    }
-}
+public class ContentEntityId(Guid value) : TypedGuid<ContentEntityId>(value);
