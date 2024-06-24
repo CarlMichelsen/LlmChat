@@ -1,12 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ConversationOption } from '../../util/type/conversationOption';
 import { getQueryParam } from '../../util/helpers/queryParameter';
+import { ConversationOption, OptionDateCollection } from '../../util/type/optionDateCollection';
+import { createOptionDateCollection } from './createOptionDateCollection';
+import { addConversationOptionToList } from './addConversationOptionToList';
 
 type ConversationListState = {
     selectedConversationId?: string;
     mobileIsOpen: boolean;
     desktopIsOpen: boolean;
-    conversationOptions?: ConversationOption[];
+    list?: OptionDateCollection[];
 }
 
 const initialState: ConversationListState = {
@@ -26,13 +28,22 @@ const conversationListSlice = createSlice({
             state.desktopIsOpen = action.payload;
         },
         setConversationOptions: (state, action: PayloadAction<ConversationOption[]>) => {
-            state.conversationOptions = action.payload;
+            state.list = createOptionDateCollection(action.payload);
         },
         addConversationOption: (state, action: PayloadAction<ConversationOption>) => {
-            state.conversationOptions?.unshift(action.payload);
+            if (state.list) {
+                addConversationOptionToList(action.payload, state.list);
+            }
+        },
+        promoteConversation: (state, action: PayloadAction<string>) => {
+            const option = state.list?.flatMap(coll => coll.options).find(o => o.id === action.payload);
+            if (option && state.list) {
+                addConversationOptionToList(option, state.list);
+            }
         },
         addConversationOptionSummary: (state, action: PayloadAction<{conversationId: string, summary: string|null}>) => {
-            const conversationOption = state.conversationOptions?.find(co => co.id === action.payload.conversationId);
+            const conversationOption = state.list?.find(odc => odc.options.find(co => co.id === action.payload.conversationId))
+                ?.options.find(co => co.id === action.payload.conversationId) ?? null;
             if (conversationOption != null) {
                 conversationOption.summary = action.payload.summary ?? undefined;
             }
@@ -48,6 +59,7 @@ export const {
     openDesktopConversationList,
     setConversationOptions,
     addConversationOption,
+    promoteConversation,
     addConversationOptionSummary,
     selectConversation
 } = conversationListSlice.actions;

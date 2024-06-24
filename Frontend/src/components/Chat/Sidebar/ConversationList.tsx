@@ -1,10 +1,10 @@
 import { useSelector } from "react-redux";
 import store, { RootApplicationState } from "../../../store";
 import { openDesktopConversationList, selectConversation } from "../../../store/conversationListSlice";
-import ConversationOptionComponent from "./ConversationOptionComponent"
-import { ConversationOption } from "../../../util/type/conversationOption";
+import { OptionDateCollection } from "../../../util/type/optionDateCollection";
+import OptionDateCollectionComponent from "./OptionDateCollectionComponent";
 
-const ConversationList: React.FC<{ conversations?: ConversationOption[] }> = ({ conversations }) => {
+const ConversationList: React.FC<{ conversations?: OptionDateCollection[] }> = ({ conversations }) => {
     const conversationListState = useSelector((state: RootApplicationState) => state.conversationList);
 
     const handleSelectConversation = (conversationId: string) => {
@@ -27,8 +27,14 @@ const ConversationList: React.FC<{ conversations?: ConversationOption[] }> = ({ 
                     >{conversationListState.desktopIsOpen ? "←" : "→"}</button>
             </div>
 
-            <ol className={conversationListState.desktopIsOpen ? "block space-y-2 overflow-y-scroll h-full pt-2" : "hidden"}>
-                {conversations?.map(s => (<ConversationOptionComponent key={s.id} option={s} selected={conversationListState.selectedConversationId == s.id} selectConversation={handleSelectConversation} />))}
+            <ol className={conversationListState.desktopIsOpen ? "block space-y-4 overflow-y-scroll h-full pt-2" : "hidden"}>
+                {conversations?.map(coll => (
+                    <OptionDateCollectionComponent
+                        key={coll.htmlId}
+                        collection={coll}
+                        selectedConversationId={conversationListState.selectedConversationId}
+                        selectConversation={handleSelectConversation} />
+                ))}
             </ol>
         </div>
     )

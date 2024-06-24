@@ -1,4 +1,4 @@
-import { ConversationOption } from "../../../util/type/conversationOption";
+import { ConversationOption } from "../../../util/type/optionDateCollection";
 
 type ConversationOptionComponentProps = {
     option: ConversationOption;
