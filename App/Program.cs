@@ -1,5 +1,6 @@
 using App;
 using App.Extensions;
+using App.Middleware;
 using Domain.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,8 @@ app.UseResponseCompression();
 app.UseStaticFiles(StaticFileOptionsFactory.Create());
 
 app.MapFallbackToFile("index.html");
+
+app.UseMiddleware<UnhandledExceptionMiddleware>();
 
 app.MapControllers();
 
