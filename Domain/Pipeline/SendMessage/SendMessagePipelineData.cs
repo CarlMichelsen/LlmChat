@@ -7,6 +7,8 @@ namespace Domain.Pipeline.SendMessage;
 
 public class SendMessagePipelineData
 {
+    public required Guid SenderUserIdentifier { get; init; }
+
     public required NewMessageDto NewUserMessageDto { get; init; }
     
     public ValidatedSendMessageData? ValidatedSendMessageData { get; set; }

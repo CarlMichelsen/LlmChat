@@ -27,7 +27,7 @@ public class ConversationDtoCacheService(
 
     public async Task CacheConversationDto(ConversationDto conversationDto)
     {
-        var key = this.GenerateConversationCacheKey(sessionService.UserProfileId, conversationDto.Id);
+        var key = CacheKeys.GenerateConversationCacheKey(sessionService.UserProfileId, conversationDto.Id);
         await cacheService.SetJson(key, conversationDto, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(15),
@@ -36,18 +36,13 @@ public class ConversationDtoCacheService(
 
     public async Task<ConversationDto?> GetConversationDto(ConversationEntityId conversationEntityId)
     {
-        var key = this.GenerateConversationCacheKey(sessionService.UserProfileId, conversationEntityId.Value);
+        var key = CacheKeys.GenerateConversationCacheKey(sessionService.UserProfileId, conversationEntityId.Value);
         return await cacheService.GetJson<ConversationDto>(key);
     }
 
     public async Task InvalidateConversationCache(ConversationEntityId conversationEntityId)
     {
-        var key = this.GenerateConversationCacheKey(sessionService.UserProfileId, conversationEntityId.Value);
+        var key = CacheKeys.GenerateConversationCacheKey(sessionService.UserProfileId, conversationEntityId.Value);
         await cacheService.Remove(key);
-    }
-
-    private string GenerateConversationCacheKey(Guid creatorIdentifier, Guid conversationId)
-    {
-        return $"conversationdto-{creatorIdentifier}-{conversationId}";
     }
 }
