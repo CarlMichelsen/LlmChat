@@ -75,6 +75,31 @@ namespace App.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SystemMessages",
+                schema: "LlmChat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    LastAppendedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SystemMessages_Profiles_CreatorId",
+                        column: x => x.CreatorId,
+                        principalSchema: "LlmChat",
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DialogSlices",
                 schema: "LlmChat",
                 columns: table => new
@@ -193,6 +218,19 @@ namespace App.Migrations
                 schema: "LlmChat",
                 table: "Messages",
                 column: "PromptId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SystemMessages_CreatorId",
+                schema: "LlmChat",
+                table: "SystemMessages",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SystemMessages_DeletedAtUtc",
+                schema: "LlmChat",
+                table: "SystemMessages",
+                column: "DeletedAtUtc",
+                filter: "\"SystemMessages\".\"DeletedAtUtc\" IS NULL");
         }
 
         /// <inheritdoc />
@@ -200,6 +238,10 @@ namespace App.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Content",
+                schema: "LlmChat");
+
+            migrationBuilder.DropTable(
+                name: "SystemMessages",
                 schema: "LlmChat");
 
             migrationBuilder.DropTable(

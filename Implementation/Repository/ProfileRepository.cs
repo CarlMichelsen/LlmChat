@@ -65,6 +65,7 @@ public class ProfileRepository(
         {
             Id = profileIdentifier,
             DefaultSystemMessage = profileDefaultOptions.Value.SystemMessage,
+            SystemMessages = [],
             SelectedModel = profileDefaultOptions.Value.ModelIdentifier,
         };
     }

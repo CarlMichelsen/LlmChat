@@ -23,6 +23,8 @@ public sealed class ApplicationContext : DbContext
 
     public DbSet<ProfileEntity> Profiles { get; init; }
 
+    public DbSet<SystemMessageEntity> SystemMessages { get; init; }
+
     public DbSet<DialogSliceEntity> DialogSlices { get; init; }
 
     public DbSet<MessageEntity> Messages { get; init; }
@@ -57,6 +59,15 @@ public sealed class ApplicationContext : DbContext
 
             entity.HasQueryFilter(e => e.DeletedAtUtc == null);
             entity.HasIndex(p => p.DeletedAtUtc).HasFilter("\"Conversations\".\"DeletedAtUtc\" IS NULL");
+        });
+
+        modelBuilder.Entity<SystemMessageEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasConversion(id => id.Value, guid => new SystemMessageEntityId(guid));
+
+            entity.HasQueryFilter(e => e.DeletedAtUtc == null);
+            entity.HasIndex(p => p.DeletedAtUtc).HasFilter("\"SystemMessages\".\"DeletedAtUtc\" IS NULL");
         });
 
         modelBuilder.Entity<ProfileEntity>(entity =>

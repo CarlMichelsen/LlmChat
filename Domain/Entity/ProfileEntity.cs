@@ -8,5 +8,7 @@ public class ProfileEntity
 
     public required string DefaultSystemMessage { get; set; }
 
+    public required List<SystemMessageEntity> SystemMessages { get; init; }
+
     public required Guid SelectedModel { get; set; }
 }
