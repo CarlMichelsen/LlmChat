@@ -1,4 +1,5 @@
 ﻿using App.Extensions;
+using App.Middleware;
 using App.Security;
 using Domain.Configuration;
 using Implementation.Database;
@@ -13,6 +14,9 @@ using LargeLanguageModelClient;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Discord;
 
 namespace App;
 
@@ -26,7 +30,23 @@ public static class Dependencies
             .Configure<ProfileDefaultOptions>(builder.Configuration.GetSection(ProfileDefaultOptions.SectionName))
             .Configure<LargeLanguageModelOptions>(builder.Configuration.GetSection(LargeLanguageModelOptions.SectionName))
             .Configure<ConversationOptions>(builder.Configuration.GetSection(ConversationOptions.SectionName))
+            .Configure<DiscordOptions>(builder.Configuration.GetSection(DiscordOptions.SectionName))
             .Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
+        
+        // Logging
+        builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
+        {
+            var discordConfiguration = builder.Configuration
+                .GetSection(DiscordOptions.SectionName)
+                .Get<DiscordOptions>()!;
+            
+            var id = ulong.Parse(discordConfiguration.WebhookId);
+            loggerConfiguration
+                .MinimumLevel.Debug()
+                .Enrich.FromLogContext()
+                .WriteTo.Discord(id, discordConfiguration.WebhookToken, restrictedToMinimumLevel: LogEventLevel.Fatal)
+                .ReadFrom.Configuration(hostingContext.Configuration);
+        });
 
         // Handler
         builder.Services
@@ -114,6 +134,10 @@ public static class Dependencies
                         .AllowCredentials();
                 });
         });
+
+        // Middleware
+        builder.Services
+            .AddScoped<UnhandledExceptionMiddleware>();
 
         // Access Control
         builder.Services.AddControllers();
