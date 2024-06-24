@@ -2,10 +2,4 @@
 
 namespace Domain.Entity.Id;
 
-public class ProfileEntityId : TypedGuid<ProfileEntityId>
-{
-    public ProfileEntityId(Guid value)
-        : base(value)
-    {
-    }
-}
+public class ProfileEntityId(Guid value) : TypedGuid<ProfileEntityId>(value);

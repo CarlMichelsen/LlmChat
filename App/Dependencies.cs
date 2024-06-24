@@ -58,6 +58,7 @@ public static class Dependencies
             .AddScoped<IMessageInitiationRepository, MessageInitiationRepository>()
             .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
             .AddScoped<IConversationSystemMessageRepository, ConversationSystemMessageRepository>()
+            .AddScoped<IConversationDeletionRepository, ConversationDeletionRepository>()
             .AddScoped<IConversationReadRepository, ConversationReadRepository>();
         
         // Client

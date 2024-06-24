@@ -2,7 +2,7 @@
 
 namespace Domain.Entity;
 
-public class ConversationEntity
+public class ConversationEntity : ISoftDeletable
 {
     public required ConversationEntityId Id { get; init; }
 
@@ -17,4 +17,6 @@ public class ConversationEntity
     public required DateTime LastAppendedUtc { get; set; }
 
     public required DateTime CreatedUtc { get; init; }
+
+    public DateTime? DeletedAtUtc { get; set; }
 }
