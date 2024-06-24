@@ -12,7 +12,8 @@ import Error from './components/LoginStates/Error';
 const RootComponent: React.FC = () => {
 	// Queries
 	const { isLoading, isError, data } = useQuery('user', getUser, {
-		refetchInterval: 1000*120,
+		staleTime: 1000 * 60 * 2,
+		cacheTime: 60,
 	});
 
 	useEffect(() => {
@@ -36,7 +37,6 @@ const RootComponent: React.FC = () => {
 const queryClient = new QueryClient();
 const App: React.FC = () => {
 	return (
-		// Provide the client to your App
 		<QueryClientProvider client={queryClient}>
 			<Provider store={store}>
 		  		<RootComponent />
@@ -45,4 +45,4 @@ const App: React.FC = () => {
 	)
 }
 
-export default App
+export default App;

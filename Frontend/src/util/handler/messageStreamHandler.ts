@@ -1,10 +1,10 @@
 import store from "../../store";
-import { addConversationOption, addConversationOptionSummary, selectConversation } from "../../store/conversationListSlice";
+import { addConversationOption, addConversationOptionSummary, promoteConversation, selectConversation } from "../../store/conversationListSlice";
 import { appendMessage, selectMessage } from "../../store/conversationSlice";
 import { AppendMessagePayload } from "../../store/conversationSlice/appendMessage";
 import { setInputReady } from "../../store/inputSlice";
 import { appendStream, clearStream } from "../../store/messageStreamSlice";
-import { ConversationOption } from "../type/conversationOption";
+import { ConversationOption } from "../type/optionDateCollection";
 import { sendMessage } from "../client/sendMessage";
 import { scrollStickToBottom } from "../helpers/scrollStickToBottom";
 import { Concluded } from "../type/llmChat/concluded";
@@ -59,11 +59,13 @@ export class MessageStreamHandler
                 const conversationOption: ConversationOption = {
                     id: this.conversationId,
                     summary: undefined,
-                    lastAppendedUtc: (new Date()).toUTCString(),
-                    createdUtc: (new Date()).toUTCString(),
+                    lastAppendedEpoch: (new Date()).getTime(),
+                    createdEpoch: (new Date()).getTime(),
                 };
                 store.dispatch(addConversationOption(conversationOption));
                 store.dispatch(setInputReady({ conversationId: this.conversationId ?? "none", ready: true } ));
+            } else if (this.conversationId) {
+                store.dispatch(promoteConversation(this.conversationId));
             }
         }
 

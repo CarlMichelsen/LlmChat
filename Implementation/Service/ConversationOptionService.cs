@@ -33,8 +33,8 @@ public class ConversationOptionService(
         {
             Id = conversationEntity.Id.Value,
             Summary = conversationEntity.Summary,
-            LastAppendedUtc = conversationEntity.LastAppendedUtc,
-            CreatedUtc = conversationEntity.CreatedUtc,
+            LastAppendedEpoch = new DateTimeOffset(conversationEntity.LastAppendedUtc).ToUnixTimeSeconds(),
+            CreatedEpoch = new DateTimeOffset(conversationEntity.CreatedUtc).ToUnixTimeSeconds(),
         };
     }
 }

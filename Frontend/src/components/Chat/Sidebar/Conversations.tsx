@@ -9,11 +9,11 @@ const Conversations: React.FC = () => {
     return (
         <>
             <div className="md:hidden block">
-                <MobileConversationList conversations={conversationListState.conversationOptions} />
+                <MobileConversationList conversations={conversationListState.list} />
             </div>
 
             <div className="hidden md:block h-full">
-                <ConversationList conversations={conversationListState.conversationOptions} />
+                <ConversationList conversations={conversationListState.list} />
             </div>
         </>
     );

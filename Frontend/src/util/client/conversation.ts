@@ -1,6 +1,6 @@
 import { Conversation } from "../type/llmChat/conversation";
 import { ServiceResponse } from "../type/serviceResponse";
-import { ConversationOption } from "../type/conversationOption";
+import { ConversationOption } from "../type/optionDateCollection";
 import { serviceRequest } from "./serviceRequest";
 
 export const getConversation = async (conversationId: string): Promise<ServiceResponse<Conversation>> => {

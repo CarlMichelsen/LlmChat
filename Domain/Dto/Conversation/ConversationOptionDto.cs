@@ -10,9 +10,9 @@ public class ConversationOptionDto
     [JsonPropertyName("summary")]
     public required string? Summary { get; init; }
 
-    [JsonPropertyName("lastAppendedUtc")]
-    public required DateTime LastAppendedUtc { get; init; }
+    [JsonPropertyName("lastAppendedEpoch")]
+    public required long LastAppendedEpoch { get; init; }
 
-    [JsonPropertyName("createdUtc")]
-    public required DateTime CreatedUtc { get; init; }
+    [JsonPropertyName("createdEpoch")]
+    public required long CreatedEpoch { get; init; }
 }

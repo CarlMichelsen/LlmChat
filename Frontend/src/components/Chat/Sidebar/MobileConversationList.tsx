@@ -1,10 +1,10 @@
 import { useSelector } from "react-redux";
-import ConversationOptionComponent from "./ConversationOptionComponent"
 import store, { RootApplicationState } from "../../../store";
 import { openMobileConversationList, selectConversation } from "../../../store/conversationListSlice";
-import { ConversationOption } from "../../../util/type/conversationOption";
+import { OptionDateCollection } from "../../../util/type/optionDateCollection";
+import OptionDateCollectionComponent from "./OptionDateCollectionComponent";
 
-const MobileConversationList: React.FC<{ conversations?: ConversationOption[] }> = ({ conversations }) => {
+const MobileConversationList: React.FC<{ conversations?: OptionDateCollection[] }> = ({ conversations }) => {
     const conversationListState = useSelector((state: RootApplicationState) => state.conversationList);
 
     const handleSelectConversation = (conversationId: string) => {
@@ -26,13 +26,17 @@ const MobileConversationList: React.FC<{ conversations?: ConversationOption[] }>
                     onMouseDown={() => store.dispatch(selectConversation(null))}>Create new conversation</button>
             </div>
 
-            {conversationListState.mobileIsOpen && (
-                <div className="absolute left-0 top-[50px] w-full z-20">
-                    <ol className="mx-2 px-6 bg-white max-h-72 overflow-y-scroll space-y-1 border-b border-l border-r border-black rounded-b-md">
-                        {conversations?.map(s => (<ConversationOptionComponent key={s.id} option={s} selected={conversationListState.selectedConversationId == s.id} selectConversation={handleSelectConversation} />))}
-                    </ol>
-                </div>
-            )}
+            <div className="absolute left-0 top-[50px] w-full z-20">
+                <ol className="mx-2 px-6 bg-white dark:bg-black max-h-72 overflow-y-scroll space-y-2 border-b border-l border-r border-black rounded-b-md">
+                    {conversationListState.mobileIsOpen && conversations?.map(coll => (
+                        <OptionDateCollectionComponent
+                            key={coll.htmlId}
+                            collection={coll}
+                            selectedConversationId={conversationListState.selectedConversationId}
+                            selectConversation={handleSelectConversation} />
+                    ))}
+                </ol>
+            </div>
         </div>
     )
 }
