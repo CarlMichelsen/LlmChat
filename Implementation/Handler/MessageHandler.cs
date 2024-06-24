@@ -2,12 +2,14 @@
 using Domain.Pipeline.SendMessage;
 using Implementation.Pipeline;
 using Interface.Handler;
+using Interface.Service;
 using Microsoft.Extensions.Logging;
 
 namespace Implementation.Handler;
 
 public class MessageHandler(
     ILogger<MessageHandler> logger,
+    ISessionService sessionService,
     SendMessagePipeline sendMessagePipeline) : IMessageHandler
 {
     public async Task SendMessage(
@@ -16,6 +18,7 @@ public class MessageHandler(
     {
         var initial = new SendMessagePipelineData
         {
+            SenderUserIdentifier = sessionService.UserProfileId,
             NewUserMessageDto = newUserMessageDto,
         };
 

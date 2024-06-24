@@ -8,6 +8,7 @@ using Interface.Service;
 namespace Implementation.Pipeline.Steps;
 
 public class GetOrCreateConversationPipelineStep(
+    ICacheService cacheService,
     IStreamWriterService streamWriterService,
     IGetOrCreateConversationRepository getOrCreateConversationRepository,
     ISessionService sessionService) : ITransactionPipelineStep<ApplicationContext, SendMessagePipelineData>
@@ -29,6 +30,10 @@ public class GetOrCreateConversationPipelineStep(
         {
             return await streamWriterService.WriteError("Failed to get or create conversation", conversationResult.Error!);
         }
+
+        var optionsCacheKey = CacheKeys
+            .GenerateConversationOptionsCacheKey(data.SenderUserIdentifier);
+        await cacheService.Remove(optionsCacheKey);
 
         data.Conversation = conversationResult.Unwrap();
         return data;
