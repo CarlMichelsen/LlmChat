@@ -11,26 +11,36 @@ namespace Implementation.Repository;
 public class SystemMessageRepository(
     ApplicationContext applicationContext) : ISystemMessageRepository
 {
-    public async Task<Result<int>> EditSystemMessageContent(
+    public async Task<Result<SystemMessageEntity>> AddSystemMessage(
         ProfileEntityId creatorId,
-        SystemMessageEntityId systemMessageEntityId,
+        string name,
         string content)
     {
         try
         {
-            var changedRows = await applicationContext.SystemMessages
-                .Include(sm => sm.Creator)
-                .Where(sm => sm.Creator.Id == creatorId && sm.Id == systemMessageEntityId)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(sm => sm.Content, content)
-                    .SetProperty(sm => sm.LastAppendedUtc, DateTime.UtcNow));
-            
-            if (changedRows == 0)
+            var profile = await applicationContext.Profiles
+                .FirstOrDefaultAsync(p => p.Id == creatorId);
+
+            if (profile is null)
             {
-                return new SafeUserFeedbackException("Did not update anything");
+                return new SafeUserFeedbackException("Did not find profile to add system message to");
             }
 
-            return changedRows;
+            var newSystemMessage = new SystemMessageEntity
+            {
+                Id = new SystemMessageEntityId(Guid.NewGuid()),
+                Creator = profile,
+                Name = name,
+                Content = content,
+                LastAppendedUtc = DateTime.UtcNow,
+                CreatedUtc = DateTime.UtcNow,
+            };
+
+            applicationContext.SystemMessages.Add(newSystemMessage);
+
+            await applicationContext.SaveChangesAsync();
+            applicationContext.Entry(newSystemMessage).State = EntityState.Detached;
+            return newSystemMessage;
         }
         catch (System.Exception e)
         {
@@ -38,26 +48,36 @@ public class SystemMessageRepository(
         }
     }
 
-    public async Task<Result<int>> EditSystemMessageName(
+    public async Task<Result<SystemMessageEntity>> EditSystemMessage(
         ProfileEntityId creatorId,
         SystemMessageEntityId systemMessageEntityId,
-        string name)
+        string? name,
+        string? content)
     {
         try
         {
-            var changedRows = await applicationContext.SystemMessages
+            var systemMessage = await applicationContext.SystemMessages
                 .Include(sm => sm.Creator)
-                .Where(sm => sm.Creator.Id == creatorId && sm.Id == systemMessageEntityId)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(sm => sm.Name, name)
-                    .SetProperty(sm => sm.LastAppendedUtc, DateTime.UtcNow));
+                .FirstOrDefaultAsync(sm => sm.Creator.Id == creatorId && sm.Id == systemMessageEntityId);
             
-            if (changedRows == 0)
+            if (systemMessage is null)
             {
-                return new SafeUserFeedbackException("Did not update anything");
+                return new SafeUserFeedbackException("Did not find system message");
             }
 
-            return changedRows;
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                systemMessage.Name = name;
+            }
+
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                systemMessage.Content = content;
+            }
+
+            await applicationContext.SaveChangesAsync();
+            applicationContext.Entry(systemMessage).State = EntityState.Detached;
+            return systemMessage;
         }
         catch (System.Exception e)
         {
@@ -80,6 +100,7 @@ public class SystemMessageRepository(
                 return new SafeUserFeedbackException("Did not find system message");
             }
             
+            applicationContext.Entry(systemMessage).State = EntityState.Detached;
             return systemMessage;
         }
         catch (System.Exception e)
@@ -94,12 +115,15 @@ public class SystemMessageRepository(
     {
         try
         {
-            return await applicationContext.SystemMessages
+            var list = await applicationContext.SystemMessages
                 .Include(sm => sm.Creator)
                 .Where(sm => sm.Creator.Id == creatorId)
                 .OrderByDescending(sm => sm.LastAppendedUtc)
                 .Take(amount)
                 .ToListAsync();
+            
+            list.ForEach(sm => applicationContext.Entry(sm).State = EntityState.Detached);
+            return list;
         }
         catch (System.Exception e)
         {

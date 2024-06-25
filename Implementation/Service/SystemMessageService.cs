@@ -1,6 +1,8 @@
 ﻿using Domain.Abstraction;
+using Domain.Dto.SystemMessage;
 using Domain.Entity;
 using Domain.Entity.Id;
+using Domain.Exception;
 using Interface.Repository;
 using Interface.Service;
 
@@ -12,22 +14,27 @@ public class SystemMessageService(
 {
     private readonly ProfileEntityId profileId = new(sessionService.UserProfileId);
 
-    public async Task<Result<int>> EditSystemMessageContent(
-        SystemMessageEntityId systemMessageEntityId,
-        string content)
+    public async Task<Result<SystemMessageEntity>> AddSystemMessage(
+        EditSystemMessageDto editSystemMessage)
     {
         try
         {
-            var editSystemResult = await systemMessageRepository
-                .EditSystemMessageContent(this.profileId, systemMessageEntityId, content);
-            
-            if (editSystemResult.IsError)
+            if (string.IsNullOrWhiteSpace(editSystemMessage.Name))
             {
-                return editSystemResult.Error!;
+                return new SafeUserFeedbackException("Name must be defined to create system message");
             }
 
-            var cacheKeys = CacheKeys.GenerateSystemMessagesCacheKey(sessionService.UserProfileId);
-            return editSystemResult.Unwrap();
+            if (string.IsNullOrWhiteSpace(editSystemMessage.Content))
+            {
+                return new SafeUserFeedbackException("Content must be defined to create system message");
+            }
+
+            var addedMessage = await systemMessageRepository.AddSystemMessage(
+                this.profileId,
+                editSystemMessage.Name,
+                editSystemMessage.Content);
+
+            return addedMessage;
         }
         catch (System.Exception e)
         {
@@ -35,23 +42,19 @@ public class SystemMessageService(
         }
     }
 
-    public async Task<Result<int>> EditSystemMessageName(
+    public async Task<Result<SystemMessageEntity>> EditSystemMessage(
         SystemMessageEntityId systemMessageEntityId,
-        string name)
+        EditSystemMessageDto editSystemMessage)
     {
         try
         {
-            var editSystemResult = await systemMessageRepository
-                .EditSystemMessageName(this.profileId, systemMessageEntityId, name);
+            var editedMessage = await systemMessageRepository.EditSystemMessage(
+                this.profileId,
+                systemMessageEntityId,
+                editSystemMessage.Name,
+                editSystemMessage.Content);
             
-            if (editSystemResult.IsError)
-            {
-                return editSystemResult.Error!;
-            }
-
-            var cacheKey = CacheKeys
-                .GenerateSystemMessagesCacheKey(sessionService.UserProfileId);
-            return editSystemResult.Unwrap();
+            return editedMessage;
         }
         catch (System.Exception e)
         {

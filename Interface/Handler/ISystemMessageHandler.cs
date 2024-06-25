@@ -8,9 +8,9 @@ public interface ISystemMessageHandler
 {
     Task<ServiceResponse<SystemMessageDto>> GetSystemMessage(SystemMessageEntityId systemMessageEntityId);
 
-    Task<ServiceResponse> EditSystemMessageContent(SystemMessageEntityId systemMessageEntityId, string content);
-    
-    Task<ServiceResponse> EditSystemMessageName(SystemMessageEntityId systemMessageEntityId, string name);
+    Task<ServiceResponse<SystemMessageDto>> AddSystemMessage(EditSystemMessageDto editSystemMessage);
+
+    Task<ServiceResponse<SystemMessageDto>> EditSystemMessage(SystemMessageEntityId systemMessageEntityId, EditSystemMessageDto editSystemMessage);
 
     Task<ServiceResponse> SoftDeleteSystemMessage(SystemMessageEntityId systemMessageEntityId);
 

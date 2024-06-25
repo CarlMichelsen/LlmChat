@@ -14,15 +14,16 @@ public interface ISystemMessageRepository
         ProfileEntityId creatorId,
         int amount);
 
-    Task<Result<int>> EditSystemMessageContent(
+    Task<Result<SystemMessageEntity>> AddSystemMessage(
         ProfileEntityId creatorId,
-        SystemMessageEntityId systemMessageEntityId,
+        string name,
         string content);
-    
-    Task<Result<int>> EditSystemMessageName(
+
+    Task<Result<SystemMessageEntity>> EditSystemMessage(
         ProfileEntityId creatorId,
         SystemMessageEntityId systemMessageEntityId,
-        string name);
+        string? name,
+        string? content);
 
     Task<Result<int>> SoftDeleteSystemMessage(
         ProfileEntityId creatorId,

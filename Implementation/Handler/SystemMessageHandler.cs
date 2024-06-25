@@ -10,32 +10,46 @@ namespace Implementation.Handler;
 public class SystemMessageHandler(
     ISystemMessageService systemMessageService) : ISystemMessageHandler
 {
-    public async Task<ServiceResponse> EditSystemMessageContent(SystemMessageEntityId systemMessageEntityId, string content)
+    public async Task<ServiceResponse<SystemMessageDto>> AddSystemMessage(EditSystemMessageDto editSystemMessage)
     {
-        var contentEditResult = await systemMessageService
-            .EditSystemMessageContent(systemMessageEntityId, content);
+        var addedResult = await systemMessageService
+            .AddSystemMessage(editSystemMessage);
         
-        if (contentEditResult.IsError)
+        if (addedResult.IsError)
         {
-            return ServiceResponse
-                .CreateErrorResponse("Failed to edit system message content", contentEditResult.Error!);
+            return ServiceResponse<SystemMessageDto>
+                .CreateErrorResponse("Failed to add system message", addedResult.Error!);
+        }
+
+        var mapResult = SystemMessageDtoMapper.Map(addedResult.Unwrap());
+        if (mapResult.IsError)
+        {
+            return ServiceResponse<SystemMessageDto>
+                .CreateErrorResponse("Failed to map system message", mapResult.Error!);
         }
         
-        return new ServiceResponse();
+        return new ServiceResponse<SystemMessageDto>(mapResult.Unwrap());
     }
 
-    public async Task<ServiceResponse> EditSystemMessageName(SystemMessageEntityId systemMessageEntityId, string name)
+    public async Task<ServiceResponse<SystemMessageDto>> EditSystemMessage(SystemMessageEntityId systemMessageEntityId, EditSystemMessageDto editSystemMessage)
     {
         var contentEditResult = await systemMessageService
-            .EditSystemMessageName(systemMessageEntityId, name);
+            .EditSystemMessage(systemMessageEntityId, editSystemMessage);
         
         if (contentEditResult.IsError)
         {
-            return ServiceResponse
-                .CreateErrorResponse("Failed to edit system message name", contentEditResult.Error!);
+            return ServiceResponse<SystemMessageDto>
+                .CreateErrorResponse("Failed to edit system message content", contentEditResult.Error!);
+        }
+
+        var mapResult = SystemMessageDtoMapper.Map(contentEditResult.Unwrap());
+        if (mapResult.IsError)
+        {
+            return ServiceResponse<SystemMessageDto>
+                .CreateErrorResponse("Failed to map system message", mapResult.Error!);
         }
         
-        return new ServiceResponse();
+        return new ServiceResponse<SystemMessageDto>(mapResult.Unwrap());
     }
 
     public async Task<ServiceResponse<SystemMessageDto>> GetSystemMessage(SystemMessageEntityId systemMessageEntityId)

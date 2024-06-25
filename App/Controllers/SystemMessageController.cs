@@ -22,19 +22,19 @@ public class SystemMessageController(
         return this.Ok(result);
     }
 
-    [HttpPut("{systemMessageId}/content")]
-    public async Task<ActionResult<ServiceResponse>> EditSystemMessageContent([FromRoute] Guid systemMessageId, [FromBody] string content)
+    [HttpPost]
+    public async Task<ActionResult<ServiceResponse<SystemMessageDto>>> AddSystemMessage([FromBody] EditSystemMessageDto addSystemMessage)
     {
         var result = await systemMessageHandler
-            .EditSystemMessageContent(new SystemMessageEntityId(systemMessageId), content);
+            .AddSystemMessage(addSystemMessage);
         return this.Ok(result);
     }
     
-    [HttpPut("{systemMessageId}/name")]
-    public async Task<ActionResult<ServiceResponse>> EditSystemMessageName([FromRoute] Guid systemMessageId, [FromBody] string name)
+    [HttpPut("{systemMessageId}")]
+    public async Task<ActionResult<ServiceResponse>> EditSystemMessageName([FromRoute] Guid systemMessageId, [FromBody] EditSystemMessageDto addSystemMessage)
     {
         var result = await systemMessageHandler
-            .EditSystemMessageName(new SystemMessageEntityId(systemMessageId), name);
+            .EditSystemMessage(new SystemMessageEntityId(systemMessageId), addSystemMessage);
         return this.Ok(result);
     }
 
@@ -49,7 +49,8 @@ public class SystemMessageController(
     [HttpGet]
     public async Task<ActionResult<ServiceResponse<List<SystemMessageDto>>>> GetSystemMessageList()
     {
-        var result = await systemMessageHandler.GetSystemMessageList();
+        var result = await systemMessageHandler
+            .GetSystemMessageList();
         return this.Ok(result);
     }
 }
