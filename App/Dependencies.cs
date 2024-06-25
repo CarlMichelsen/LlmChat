@@ -54,6 +54,7 @@ public static class Dependencies
             .AddScoped<IProfileHandler, ProfileHandler>()
             .AddScoped<IModelHandler, ModelHandler>()
             .AddScoped<IMessageHandler, MessageHandler>()
+            .AddScoped<ISystemMessageHandler, SystemMessageHandler>()
             .AddScoped<IConversationHandler, ConversationHandler>();
 
         // Pipeline
@@ -66,6 +67,7 @@ public static class Dependencies
             .AddScoped<ICacheService, CacheService>()
             .AddScoped<ISessionService, SessionService>()
             .AddScoped<IModelService, ModelService>()
+            .AddScoped<ISystemMessageService, SystemMessageService>()
             .AddScoped<IStreamWriterService, StreamWriterService>()
             .AddScoped<ISummaryService, SummaryService>()
             .AddScoped<IConversationDeletionService, ConversationDeletionService>()
@@ -81,6 +83,7 @@ public static class Dependencies
             .AddScoped<IGetOrCreateConversationRepository, GetOrCreateConversationRepository>()
             .AddScoped<IConversationSystemMessageRepository, ConversationSystemMessageRepository>()
             .AddScoped<IConversationDeletionRepository, ConversationDeletionRepository>()
+            .AddScoped<ISystemMessageRepository, SystemMessageRepository>()
             .AddScoped<IConversationReadRepository, ConversationReadRepository>();
         
         // Client
