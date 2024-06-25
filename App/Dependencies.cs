@@ -68,6 +68,8 @@ public static class Dependencies
             .AddScoped<IModelService, ModelService>()
             .AddScoped<IStreamWriterService, StreamWriterService>()
             .AddScoped<ISummaryService, SummaryService>()
+            .AddScoped<IConversationDeletionService, ConversationDeletionService>()
+            .AddScoped<IConversationSystemMessageService, ConversationSystemMessageService>()
             .AddScoped<IConversationDtoService, ConversationDtoService>()
             .AddScoped<IConversationDtoCacheService, ConversationDtoCacheService>()
             .AddScoped<IConversationOptionService, ConversationOptionService>();
