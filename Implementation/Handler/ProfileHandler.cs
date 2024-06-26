@@ -3,15 +3,24 @@ using Domain.Entity.Id;
 using Interface.Handler;
 using Interface.Repository;
 using Interface.Service;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Implementation.Handler;
 
 public class ProfileHandler(
+    ICacheService cacheService,
     ISessionService sessionService,
     IProfileRepository profileRepository) : IProfileHandler
 {
     public async Task<ServiceResponse<string>> GetDefaultSystemMessage()
     {
+        var cacheKey = this.GetCacheKey();
+        var cachedMessage = await cacheService.Get(cacheKey);
+        if (cachedMessage is not null)
+        {
+            return new ServiceResponse<string>(cachedMessage);
+        }
+
         var profileResult = await profileRepository
             .GetAndOrCreateProfile(new ProfileEntityId(sessionService.UserProfileId));
         
@@ -22,7 +31,13 @@ public class ProfileHandler(
                 profileResult.Error!);
         }
 
-        return new ServiceResponse<string>(profileResult.Unwrap().DefaultSystemMessage);
+        var message = profileResult.Unwrap().DefaultSystemMessage;
+        await cacheService.Set(cacheKey, message, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(15),
+        });
+
+        return new ServiceResponse<string>(message);
     }
 
     public async Task<ServiceResponse<string>> SetDefaultSystemMessage(string systemMessage)
@@ -38,6 +53,12 @@ public class ProfileHandler(
                 newSystemMessageResult.Error!);
         }
 
+        var cacheKey = this.GetCacheKey();
+        await cacheService.Remove(cacheKey);
+
         return new ServiceResponse<string>(newSystemMessageResult.Unwrap());
     }
+
+    private string GetCacheKey()
+        => CacheKeys.GenerateDefaultSystemMessageCacheKey(sessionService.UserProfileId);
 }

@@ -12,8 +12,8 @@ public static class CacheKeys
         return $"conversationdto-{creatorIdentifier}-{conversationId}";
     }
 
-    public static string GenerateSystemMessagesCacheKey(Guid creatorIdentifier)
+    public static string GenerateDefaultSystemMessageCacheKey(Guid creatorIdentifier)
     {
-        return $"systemMessage-{creatorIdentifier}";
+        return $"default-system-message-{creatorIdentifier}";
     }
 }
