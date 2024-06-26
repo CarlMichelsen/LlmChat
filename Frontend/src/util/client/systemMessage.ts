@@ -1,16 +1,17 @@
-import { SystemMessage } from "../type/systemMessage";
+import { EditSystemMessageDto } from "../type/systemMessage/editSystemMessage";
+import { SystemMessage } from "../type/systemMessage/systemMessage";
 import { serviceRequest } from "./serviceRequest";
 
 export const getSystemMessage = async (systemMessageId: string) => {
     return await serviceRequest<SystemMessage>("GET", `/api/v1/systemMessage/${systemMessageId}`);
 }
 
-export const editSystemMessageContent = async (systemMessageId: string, content: string) => {
-    return await serviceRequest<SystemMessage>("PUT", `/api/v1/systemMessage/${systemMessageId}/content`, content);
+export const addSystemMessage = async (addSystemMessage: EditSystemMessageDto) => {
+    return await serviceRequest<SystemMessage>("POST", "/api/v1/systemMessage", addSystemMessage);
 }
 
-export const editSystemMessageName = async (systemMessageId: string, name: string) => {
-    return await serviceRequest<SystemMessage>("PUT", `/api/v1/systemMessage/${systemMessageId}/name`, name);
+export const editSystemMessage = async (systemMessageId: string, editSystemMessage: EditSystemMessageDto) => {
+    return await serviceRequest<SystemMessage>("PUT", `/api/v1/systemMessage/${systemMessageId}`, editSystemMessage);
 }
 
 export const softDeleteSystemMessage = async (systemMessageId: string) => {
