@@ -16,7 +16,7 @@ const Sidebar: React.FC = () => {
     const fetchConversationOptions = async (): Promise<ConversationOption[]> => {
         const res = await getConversationOptions();
         if (res.ok) {
-            return res.data;
+            return res.data!;
         } else {
             throw new Error("Failed to fetch conversation options");
         }

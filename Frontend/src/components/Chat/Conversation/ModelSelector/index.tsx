@@ -15,7 +15,7 @@ const ModelSelector: React.FC = () => {
         if (res.ok) {
             return res.data!;
         } else {
-            throw new Error("Failed to fetch conversation options");
+            throw new Error("Failed to fetch models");
         }
     }
 
@@ -24,7 +24,7 @@ const ModelSelector: React.FC = () => {
     const { data, status } = useQuery<LargeLanguageModelDto[], Error>(
         'models',
         fetchModels, {
-        staleTime: Infinity
+        staleTime: 1000 * 60 * 2
     });
 
     useEffect(() => {

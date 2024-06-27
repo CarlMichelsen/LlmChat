@@ -23,7 +23,7 @@ const RichTextArea: React.FC<RichTextAreaProps> = ({ name, id, text, setText, di
             onChange={(e) => setText(e.target.value)}
             disabled={disabled ?? false}
             onKeyDown={handleEnter}
-            className="focus:outline-none resize-none w-full h-full border border-black rounded-md p-1 dark:bg-zinc-800 bg-white disabled:bg-zinc-400 disabled:border-none"></textarea>
+            className="focus:outline-none resize-none w-full h-full border border-black rounded-sm p-1 dark:bg-zinc-800 bg-white disabled:bg-zinc-400 disabled:border-none"></textarea>
     );
 }
 

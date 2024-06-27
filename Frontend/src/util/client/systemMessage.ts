@@ -19,5 +19,5 @@ export const softDeleteSystemMessage = async (systemMessageId: string) => {
 }
 
 export const getSystemMessageList = async () => {
-    return await serviceRequest<SystemMessage>("GET", "/api/v1/systemMessage");
+    return await serviceRequest<SystemMessage[]>("GET", "/api/v1/systemMessage");
 }
