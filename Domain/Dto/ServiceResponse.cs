@@ -1,8 +1,37 @@
-﻿using Domain.Exception;
+﻿using System.Diagnostics.CodeAnalysis;
+using Domain.Exception;
 
 namespace Domain.Dto;
 
-public class ServiceResponse<T>
+public class ServiceResponse(params string[] errors)
+{
+    public virtual bool Ok => this.Errors.Count == 0;
+
+    public List<string> Errors { get; init; } = new List<string>(errors);
+
+    public DateTime DateTimeUtc => DateTime.UtcNow;
+
+    public static ServiceResponse CreateErrorResponse(string error, System.Exception? exception = default)
+    {
+        List<string> errs = [error];
+        if (exception is SafeUserFeedbackException safe)
+        {
+            errs.Add(safe.Message);
+            if (safe.Details.Count != 0)
+            {
+                errs.AddRange(safe.Details);
+            }
+        }
+
+        return new ServiceResponse
+        {
+            Errors = errs,
+        };
+    }
+}
+
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleType", Justification = "Reviewed.")]
+public class ServiceResponse<T> : ServiceResponse
 {
     public ServiceResponse(T data)
     {
@@ -19,15 +48,11 @@ public class ServiceResponse<T>
     {
     }
 
-    public bool Ok => this.Data is not null && this.Errors.Count == 0;
+    public override bool Ok => this.Data is not null && this.Errors.Count == 0;
 
     public T? Data { get; init; }
 
-    public List<string> Errors { get; init; } = new();
-
-    public DateTime DateTimeUtc => DateTime.UtcNow;
-
-    public static ServiceResponse<T> CreateErrorResponse(string error, System.Exception? exception = default)
+    public static new ServiceResponse<T> CreateErrorResponse(string error, System.Exception? exception = default)
     {
         List<string> errs = [error];
         if (exception is SafeUserFeedbackException safe)

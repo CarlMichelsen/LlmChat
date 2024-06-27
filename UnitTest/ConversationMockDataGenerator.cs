@@ -39,6 +39,7 @@ public static class ConversationMockDataGenerator
         {
             Id = SampleCreatorIdentifier,
             DefaultSystemMessage = "I'm a test system message",
+            SystemMessages = [],
             SelectedModel = MockModel.Id,
         };
     }

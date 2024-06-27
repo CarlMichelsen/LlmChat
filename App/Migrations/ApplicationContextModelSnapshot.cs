@@ -189,6 +189,41 @@ namespace App.Migrations
                     b.ToTable("Prompts", "LlmChat");
                 });
 
+            modelBuilder.Entity("Domain.Entity.SystemMessageEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastAppendedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("DeletedAtUtc")
+                        .HasFilter("\"SystemMessages\".\"DeletedAtUtc\" IS NULL");
+
+                    b.ToTable("SystemMessages", "LlmChat");
+                });
+
             modelBuilder.Entity("Domain.Entity.ContentEntity", b =>
                 {
                     b.HasOne("Domain.Entity.MessageEntity", null)
@@ -233,6 +268,17 @@ namespace App.Migrations
                     b.Navigation("Prompt");
                 });
 
+            modelBuilder.Entity("Domain.Entity.SystemMessageEntity", b =>
+                {
+                    b.HasOne("Domain.Entity.ProfileEntity", "Creator")
+                        .WithMany("SystemMessages")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
             modelBuilder.Entity("Domain.Entity.ConversationEntity", b =>
                 {
                     b.Navigation("DialogSlices");
@@ -246,6 +292,11 @@ namespace App.Migrations
             modelBuilder.Entity("Domain.Entity.MessageEntity", b =>
                 {
                     b.Navigation("Content");
+                });
+
+            modelBuilder.Entity("Domain.Entity.ProfileEntity", b =>
+                {
+                    b.Navigation("SystemMessages");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,7 +8,7 @@ export const handleUserDataState = (isLoading: boolean, isError: boolean, servic
 		console.log("fetching user login state...");
 	} else if (serviceResponse != null) {
 		serviceResponse.ok
-			? store.dispatch(login(serviceResponse.data))
+			? store.dispatch(login(serviceResponse.data!))
 			: store.dispatch(logout());
 	} else if (isError) {
 		console.error("ERROR");

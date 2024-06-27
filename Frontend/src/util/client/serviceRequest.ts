@@ -8,7 +8,7 @@ const getFullDestinationFromPath = (path: string) => {
     return `${rootUrl()}/${path}`;
 }
 
-export const serviceRequest = async <T>(method: "GET"|"POST"|"DELETE", path: string, body?: any): Promise<ServiceResponse<T>> => {
+export const serviceRequest = async <T>(method: "GET"|"POST"|"PUT"|"DELETE", path: string, body?: any): Promise<ServiceResponse<T>> => {
     try {
         const fullDestination = getFullDestinationFromPath(path);
         const init: RequestInit = {

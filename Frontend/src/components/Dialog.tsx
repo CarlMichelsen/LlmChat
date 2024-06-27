@@ -20,10 +20,19 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children }) => {
         >
             <dialog
                 onClick={handleDialogClick}
-                className="text-black bg-white dark:text-white dark:bg-zinc-600 p-4 rounded-md w-full h-[750px] md:w-[750px]"
+                className="grid grid-rows-[1.5rem_1fr] text-black bg-white dark:text-white dark:bg-zinc-600 rounded-md w-full h-[750px] md:w-[750px]"
                 open
             >
-                {children}
+                <div className="grid grid-cols-[1fr_1.5rem]">
+                    <div></div>
+
+                    <div>
+                        <button className="bg-red-600 hover:bg-red-800 hover:underline text-white w-6 h-6 rounded-tr-md rounded-bl-md" onMouseDown={onClose}>X</button>
+                    </div>
+                </div>
+                <div className="mx-4 mb-4">
+                    {children}
+                </div>
             </dialog>
         </div>,
         document.body

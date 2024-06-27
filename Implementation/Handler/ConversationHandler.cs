@@ -3,7 +3,6 @@ using Domain.Dto.Conversation;
 using Domain.Entity.Id;
 using Domain.Exception;
 using Interface.Handler;
-using Interface.Repository;
 using Interface.Service;
 
 namespace Implementation.Handler;
@@ -11,8 +10,8 @@ namespace Implementation.Handler;
 public class ConversationHandler(
     IConversationDtoService conversationDtoService,
     IConversationOptionService conversationOptionService,
-    IConversationDeletionRepository conversationDeletionRepository,
-    IConversationSystemMessageRepository conversationSystemMessageRepository) : IConversationHandler
+    IConversationDeletionService conversationDeletionService,
+    IConversationSystemMessageService conversationSystemMessageService) : IConversationHandler
 {
     public async Task<ServiceResponse<ConversationDto>> GetConversation(ConversationEntityId conversationId)
     {
@@ -29,7 +28,7 @@ public class ConversationHandler(
 
     public async Task<ServiceResponse<bool>> DeleteConversation(ConversationEntityId conversationId)
     {
-        var deleteResult = await conversationDeletionRepository
+        var deleteResult = await conversationDeletionService
             .DeleteConversation(conversationId);
         
         if (deleteResult.IsError)
@@ -55,7 +54,7 @@ public class ConversationHandler(
 
     public async Task<ServiceResponse<string>> SetConversationSystemMessage(ConversationEntityId conversationId, string newSystemMessage)
     {
-        var setSystemMessageResult = await conversationSystemMessageRepository
+        var setSystemMessageResult = await conversationSystemMessageService
             .SetConversationSystemMessage(conversationId, newSystemMessage);
         
         if (setSystemMessageResult.IsError)

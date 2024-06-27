@@ -11,4 +11,9 @@ public static class CacheKeys
     {
         return $"conversationdto-{creatorIdentifier}-{conversationId}";
     }
+
+    public static string GenerateDefaultSystemMessageCacheKey(Guid creatorIdentifier)
+    {
+        return $"default-system-message-{creatorIdentifier}";
+    }
 }

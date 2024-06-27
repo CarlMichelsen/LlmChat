@@ -1,6 +1,6 @@
 type OkServiceResponse<T> = {
     ok: true;
-    data: T;
+    data: T|null;
     errors: [];
 }
 
