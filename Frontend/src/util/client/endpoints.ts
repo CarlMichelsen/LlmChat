@@ -25,7 +25,7 @@ const replaceSubdomain = (newSubdomain: string, overrideUrl?: string): string =>
 
 export const loginUrl = (): string => {
     const url = new URL(import.meta.env.MODE == "development" ? "http://localhost:5197" : replaceSubdomain("login"));
-    return [url.protocol, '//', url.host, url.pathname].join('');
+    return [url.protocol, '//', url.host, url.pathname].join('').slice(0, -1);
 }
 
 export const rootUrl = (): string => import.meta.env.VITE_APP_ENV === 'development'
