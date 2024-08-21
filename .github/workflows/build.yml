@@ -1,15 +1,15 @@
-name: Build
+name: Build Workflow
 
 on: [pull_request]
 
 jobs:
-    docker-build:
-        name: Build
-        runs-on: ubuntu-latest
+  docker-build:
+    name: Build
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout the repo
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
 
-            - name: Build container image
-              run: docker build -t ${{secrets.REGISTRY}}/${{secrets.IMAGE_NAME}}:latest .
+      - name: Build container image
+        run: docker build -t ${{secrets.DOCKER_REGISTRY}}/${{secrets.IMAGE_NAME}}:latest .
